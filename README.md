@@ -2,9 +2,7 @@
 
 **Pin, highlight or box anything on an HTML report — then hand it to your AI.**
 
-在 HTML 報告上直接右鍵標註，標記即時存成檔案，AI 讀檔修改並逐條回覆。
-
-![Pin4Html screenshot](docs/screenshot.jpg)
+![Pin4Html screenshot](docs/screenshot-en.jpg)
 
 AI agents increasingly produce reports as HTML. Reviewing them usually means screenshots and "the third paragraph under section 2…".
 Pin4Html lets you right-click to annotate the page itself, auto-saves every annotation to a `<report>.pins.json`
@@ -13,97 +11,119 @@ next to the report, and lets the agent write replies back that show up on the pa
 - **Zero dependencies** — one JS file + one Python script (standard library only)
 - **Never touches your report** — the annotator is injected on the fly while serving
 - **Agent-friendly** — `show` prints a compact, numbered list; `reply` writes answers back
-- Works as a **Claude Code skill** out of the box (but any agent that can run a command and read a file can use it)
+- **English & 繁體中文 UI** — follows the browser language, switchable in the panel
+- Works as a **Claude Code skill** out of the box (any agent that can run a command and read a file can use it)
 
-> UI language: Traditional Chinese (繁體中文) for now.
+[繁體中文說明 ↓](#繁體中文)
 
----
-
-## 快速開始
+## Quick start
 
 ```bash
 python pin4html.py serve report.html
 ```
 
-瀏覽器會自動開啟報告。開始標記：
+Your browser opens the report. Then:
 
-| 操作 | 效果 |
+| Action | Result |
 |---|---|
-| 選取文字 → 右鍵 | 文字標記（高亮＋編號），選單按 1–8 快選類型 |
-| 未選取 → 右鍵 | 釘一個圖釘（虛線框預覽會附著的元素） |
-| `Alt+D` | 拖曳框選一塊區域（圖表局部、版面） |
-| 左鍵點標記 / 拖曳圖釘 | 編輯 / 移動 |
-| 右鍵已有標記 | 改類型、必改、已解決、重新框選、刪除（可復原） |
-| `Alt+R` / `Alt+H` | 標記清單 / 隱藏全部標記 |
-| `Shift` + 右鍵 | 瀏覽器原生選單 |
+| Select text → right-click | Text highlight with a number; press 1–8 to pick a type |
+| Right-click (no selection) | Drop a pin (a dashed box previews the element it attaches to) |
+| `Alt+D` | Drag to box an area (part of a chart, a layout region) |
+| Click / drag a pin | Edit / move |
+| Right-click an annotation | Change type, must-fix, resolved, re-select, delete (undoable) |
+| `Alt+R` / `Alt+H` | Annotation list / hide all annotations |
+| `Shift` + right-click | Native browser menu |
 
-### 標記類型
+**Types:** 💬 Comment · ✏️ Rewrite (with replacement) · ✂️ Delete · ➕ Add · 🔍 Verify · ❓ Question · 🎨 Layout · 👍 Keep — plus 🔴 must-fix and ✅ resolved flags.
 
-💬 留言 · ✏️ 改寫（附「改為」）· ✂️ 刪除 · ➕ 補充 · 🔍 查證 · ❓ 疑問 · 🎨 版面 · 👍 保留
+### Hand it to your AI
 
-另有 🔴 必改、✅ 已解決 兩個旗標。
-
-### 交給 AI
-
-每次改動都會寫入 `report.pins.json`（右下角 🟢 = 已同步）。AI 端：
+Every change is written to `report.pins.json` (🟢 in the corner = synced). On the agent side:
 
 ```bash
-python pin4html.py show report.html                     # 讀標記（精簡、帶編號與上下文）
-python pin4html.py reply report.html --file replies.json  # 寫回覆
+python pin4html.py show report.html                       # read pins (compact, numbered, with context)
+python pin4html.py reply report.html --file replies.json  # write replies back
 ```
 
-`replies.json`：
+`replies.json`:
 
 ```json
-{ "1": { "reply": "已改為同比 12%", "resolved": true },
-  "3": "這句刪了，與表格重複" }
+{ "1": { "reply": "Changed to 12% YoY", "resolved": true },
+  "3": "Removed — it duplicated the table" }
 ```
 
-開著的頁面約 2 秒內就會顯示「🤖 收到 AI 回覆」；若報告本身也被改了，會提示重新載入。
-你和 AI 同時修改時以樂觀鎖＋逐則合併處理，不會互相覆蓋。
+Within ~2 s the open page shows "🤖 AI replied"; if the report itself changed, it offers to reload.
+Concurrent edits (you on the page, the agent on the file) are merged per annotation with optimistic locking — nothing gets overwritten.
 
-## 作為 Claude Code skill 安裝
+### Install as a Claude Code skill
 
 ```bash
 git clone https://github.com/youllook/Pin4Html ~/.claude/skills/pin4html
 ```
 
-之後對 Claude 說「我要審閱這份報告」，它會自動啟動伺服器；標完說「改吧」，它就讀檔、修改、逐條回覆。
+Then tell Claude "review this report" — it starts the server; when you're done, say "go ahead" and it reads the pins, edits the report and replies to each one.
 
-## 沒有伺服器時（離線 / 分享給別人）
+### Without a server (offline / sharing)
 
 ```bash
-python pin4html.py inject report.html          # → report.review.html（腳本內嵌，可離線）
-python pin4html.py inject report.html --cdn    # 改用 CDN 引用
-python pin4html.py strip report.review.html    # 移除注入
+python pin4html.py inject report.html          # → report.review.html with the script inlined
+python pin4html.py inject report.html --cdn    # reference the CDN instead
+python pin4html.py strip report.review.html    # remove it again
 ```
 
-或直接在任何 HTML 加一行：
+Or add one line to any HTML page:
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/youllook/Pin4Html@1/pin4html.js"></script>
 ```
 
-此模式標記存在瀏覽器 localStorage，用清單底部的「📋 複製給 Claude」（Markdown，可選精簡／標準／詳細）或「⬇️ JSON」交回。
+In this mode annotations live in the browser's localStorage; hand them over with **Copy for AI** (Markdown: brief / standard / full) or **⬇️ JSON**.
 
-## `.pins.json` 格式
+### Language
 
-見 [`examples/demo.pins.json`](examples/demo.pins.json)。每則標記：
+The UI follows the browser language (`zh*` → 繁體中文, otherwise English). Override it with, in order of precedence:
 
-| 欄位 | 說明 |
+1. URL parameter `?p4hlang=en` / `?p4hlang=zh`
+2. The **EN / 中** button in the panel (remembered per browser)
+3. `<script … data-lang="en">`, or `--lang en|zh` on `serve` / `inject`
+
+### `.pins.json` format
+
+See [`examples/demo-en.pins.json`](examples/demo-en.pins.json). Each annotation:
+
+| Field | Meaning |
 |---|---|
-| `n` / `id` | 頁面上的編號 / 穩定 id |
+| `n` / `id` | Number shown on the page / stable id |
 | `type` | `comment` `rewrite` `delete` `add` `verify` `question` `style` `keep` |
-| `kind` | `text`（文字）· `pin`（圖釘）· `region`（區域） |
-| `quote` `prefix` `suffix` | 文字標記的原文與前後文（用於重新定位） |
-| `path` `rx` `ry` `rw` `rh` | 圖釘／區域的 CSS selector 與相對位置比例 |
-| `heading` | 最近的上層標題 |
-| `note` `replacement` | 說明、改寫／補充內容 |
-| `priority` `resolved` `reply` | `must`/`should`、是否已解決、AI 回覆 |
+| `kind` | `text` · `pin` · `region` |
+| `quote` `prefix` `suffix` | Quoted text and surrounding context (used to re-anchor) |
+| `path` `rx` `ry` `rw` `rh` | CSS selector and relative position/size for pins and areas |
+| `heading` | Nearest heading above |
+| `note` `replacement` | Note; replacement / content to add |
+| `priority` `resolved` `reply` | `must`/`should`, resolved flag, AI reply |
 
-## 致謝
+---
 
-互動設計參考了 [onUI](https://github.com/onllm-dev/onUI)（元素預覽、區域框選、分級輸出）；程式碼為獨立實作。
+## 繁體中文
+
+![Pin4Html 截圖](docs/screenshot-zh.jpg)
+
+在 HTML 報告上直接右鍵標註，標記即時存成報告旁的 `.pins.json`，AI 讀檔修改並逐條回覆，回覆直接顯示在頁面上。
+
+```bash
+python pin4html.py serve report.html
+```
+
+- **操作**：選文字＋右鍵＝文字標記；空白處右鍵＝圖釘；`Alt+D`＝框選區域；`Alt+R`＝清單；`Alt+H`＝隱藏標記；`Shift`＋右鍵＝原生選單
+- **類型**：💬留言 ✏️改寫 ✂️刪除 ➕補充 🔍查證 ❓疑問 🎨版面 👍保留，另有 🔴必改、✅已解決
+- **交給 AI**：`show` 讀標記、`reply --file replies.json` 寫回覆，開著的頁面約 2 秒內出現「🤖 收到 AI 回覆」
+- **Claude Code skill**：`git clone https://github.com/youllook/Pin4Html ~/.claude/skills/pin4html`，之後說「我要審閱這份報告」即可
+- **離線 / 分享**：`inject`（內嵌）、`inject --cdn`、`strip`；或在任何 HTML 加上 CDN 那一行
+- **語言**：預設跟隨瀏覽器；`?p4hlang=zh`、側欄「EN / 中」按鈕、`data-lang` 或 `--lang` 可覆寫
+
+## Credits
+
+Interaction ideas (element preview, area boxing, tiered export) were inspired by [onUI](https://github.com/onllm-dev/onUI); the code is an independent implementation.
 
 ## License
 

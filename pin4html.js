@@ -17,16 +17,132 @@
   const SERVER = (SCRIPT && SCRIPT.dataset.server) || null; // 例如 "/__pin4html/"
   const FILE = decodeURIComponent(location.pathname);
   const KEY = 'pin4html:' + FILE;
-  const TYPES = {
-    comment:  { label: '留言', icon: '💬', color: '#3b82f6', hint: '一般意見' },
-    rewrite:  { label: '改寫', icon: '✏️', color: '#f59e0b', hint: '換個說法', field: '改為' },
-    delete:   { label: '刪除', icon: '✂️', color: '#ef4444', hint: '整段拿掉', quick: true },
-    add:      { label: '補充', icon: '➕', color: '#10b981', hint: '這裡要加內容', field: '補充內容' },
-    verify:   { label: '查證', icon: '🔍', color: '#8b5cf6', hint: '數據／出處待確認' },
-    question: { label: '疑問', icon: '❓', color: '#0ea5e9', hint: '看不懂／為什麼' },
-    style:    { label: '版面', icon: '🎨', color: '#ec4899', hint: '排版／圖表／格式' },
-    keep:     { label: '保留', icon: '👍', color: '#22c55e', hint: '這段好，別動', quick: true },
+
+  // ---------- i18n ----------
+  // 優先序：?p4hlang= > 使用者在側欄切換（localStorage）> <script data-lang> > 瀏覽器語言
+  const LANG_KEY = 'pin4html:pref:lang';
+  const LANG = (() => {
+    let l = new URLSearchParams(location.search).get('p4hlang');
+    try { l = l || localStorage.getItem(LANG_KEY); } catch (e) {}
+    l = l || (SCRIPT && SCRIPT.dataset.lang) || navigator.language || 'en';
+    return /^zh/i.test(l) ? 'zh' : 'en';
+  })();
+  const ZH = {
+    types: {
+      comment: ['留言', '一般意見'], rewrite: ['改寫', '換個說法', '改為'], delete: ['刪除', '整段拿掉'],
+      add: ['補充', '這裡要加內容', '補充內容'], verify: ['查證', '數據／出處待確認'], question: ['疑問', '看不懂／為什麼'],
+      style: ['版面', '排版／圖表／格式'], keep: ['保留', '這段好，別動'],
+    },
+    sync: {
+      local: '僅存在此瀏覽器（用「複製給 AI」或匯出 JSON 交回）', connecting: '連線中…', saving: '儲存中…',
+      synced: '已自動同步到檔案，AI 可直接讀取', offline: '伺服器離線，改動暫存在頁面，恢復後自動補存',
+    },
+    lsFail: '⚠️ 無法寫入 localStorage，請記得匯出 JSON',
+    gotReply: '🤖 收到 AI 回覆', pinsUpdated: '🔄 標記已更新', htmlChanged: '📄 報告內容已修改', reloadNew: '重新載入看新版',
+    clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
+    fabTitle: '審閱標記（Alt+R）', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
+    drawTip: '🔲 拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
+    headText: (q) => '標記選取：「' + q + '」', headRegion: (t) => '標記框選區域（' + t + ' 內）',
+    headPin: (t) => '在此處釘一個標記（虛線框＝會附著的元素 ' + t + '）',
+    toRegion: '改成框選區域…', openList: '開啟標記清單',
+    edit: '編輯…', changeTo: (l) => '改成「' + l + '」', unmust: '取消必改', setMust: '標為必改',
+    reopen: '重新開啟', setResolved: '標為已解決', reanchorRange: '重新框選範圍', delAnn: '刪除標記',
+    quickAdded: (i, l, n) => i + ' 已新增「' + l + '」#' + n + '（點標記可補說明）', addNote: '補說明',
+    deleted: (n) => '🗑️ 已刪除標記 #' + n, undo: '復原',
+    notePh: (hint) => hint + '…（Ctrl+Enter 儲存，Esc 取消）',
+    orphanLong: '⚠️ 頁面上找不到原文（內容可能已被修改），可用「重新框選」重新定位',
+    note: '說明', aiReply: '🤖 AI 回覆：', must: '必改', resolved: '已解決',
+    del: '刪除', reanchorBtn: '🎯 重新框選', reanchorTitle: '選取新的文字範圍來重新定位', cancel: '取消', save: '儲存',
+    added: (i, n) => i + ' 已新增 #' + n, reanchorTip: (n) => '🎯 請選取新的文字範圍來定位 #' + n + '（Esc 取消）',
+    sideTitle: '📝 審閱標記', stats: (o, m, d) => '未解決 ' + o + ' 則（必改 ' + m + '）・已解決 ' + d + ' 則',
+    all: '全部', showResolved: '顯示已解決', hideMarks: '隱藏頁面標記',
+    empty: ['還沒有標記', '選取文字後按右鍵，或直接在任意位置按右鍵', 'Shift+右鍵 = 原生選單'],
+    detail: '輸出詳細度', levels: { brief: '精簡', std: '標準', full: '詳細' },
+    levelTips: { brief: '一則一行，省 token', std: '原文＋位置＋說明', full: '再加上下文、選擇器、時間（定位最穩）' },
+    copy: '📋 複製給 AI', copyTitle: '複製 Markdown 審閱意見，貼到 AI 對話即可', jsonTitle: '下載 JSON（AI 可直接讀檔）',
+    importBtn: '⬆️ 匯入', clear: '清空', clearConfirm: (n) => '確定清空全部 ' + n + ' 則標記？（建議先匯出 JSON）',
+    orphanShort: '⚠️ 找不到原文', regionIn: '🔲 區域 in <',
+    copied: (n) => '📋 已複製 ' + n + ' 則意見，貼到 AI 對話即可', imported: (n) => '⬆️ 已匯入 ' + n + ' 則', importFail: '⚠️ 匯入失敗：',
+    welcome: '📝 審閱模式：選取文字或直接按右鍵新增標記（Alt+R 開清單）',
+    langBtn: 'EN', langTitle: 'Switch to English',
+    md: {
+      title: '# 審閱意見：', count: (n) => '（' + n + ' 則）', region: '區域', point: '位置', top: '開頭',
+      file: '- 檔案：', exported: '- 匯出：', summary: (o, m, d) => '- 未解決 ' + o + ' 則（必改 ' + m + '）；已解決 ' + d + ' 則',
+      mustTag: '【必改】', orphan: '（⚠️ 頁面上已找不到原文）', loc: '- 位置：', beforeFirst: '（第一個標題之前）',
+      quote: '- 原文：', context: '- 上下文：', selector: '- 選擇器：', content: '內容', note: '- 說明：', reply: '- AI 回覆：',
+      regionLine: (t, s, x, y, w, h) => '- 框選區域：`<' + t + '>`「' + s + '」內，左 ' + x + '、上 ' + y + '、寬 ' + w + '、高 ' + h,
+      pinLine: (t, s) => '- 標記點：`<' + t + '>`「' + s + '」',
+      meta: (id, c, u) => '- id：`' + id + '`・建立 ' + c + (u ? '・更新 ' + u : ''), resolvedHead: '### 已解決（僅供參考）',
+    },
   };
+  const EN = {
+    types: {
+      comment: ['Comment', 'General feedback'], rewrite: ['Rewrite', 'Say it differently', 'Replace with'],
+      delete: ['Delete', 'Remove this'], add: ['Add', 'Add content here', 'Content to add'],
+      verify: ['Verify', 'Check data / source'], question: ['Question', 'Unclear / why?'],
+      style: ['Layout', 'Layout / chart / format'], keep: ['Keep', "Good — don't touch"],
+    },
+    sync: {
+      local: 'Stored in this browser only (use "Copy for AI" or export JSON)', connecting: 'Connecting…', saving: 'Saving…',
+      synced: 'Auto-saved to file — your AI can read it', offline: 'Server offline — changes kept here, will retry',
+    },
+    lsFail: '⚠️ Cannot write to localStorage — remember to export JSON',
+    gotReply: '🤖 AI replied', pinsUpdated: '🔄 Pins updated', htmlChanged: '📄 Report changed', reloadNew: 'Reload',
+    clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
+    fabTitle: 'Annotations (Alt+R)', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
+    drawTip: '🔲 Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
+    headText: (q) => 'Annotate selection: "' + q + '"', headRegion: (t) => 'Annotate boxed area (inside ' + t + ')',
+    headPin: (t) => 'Drop a pin here (dashed box = attached element ' + t + ')',
+    toRegion: 'Box an area instead…', openList: 'Open annotation list',
+    edit: 'Edit…', changeTo: (l) => 'Change to "' + l + '"', unmust: 'Unmark must-fix', setMust: 'Mark as must-fix',
+    reopen: 'Reopen', setResolved: 'Mark resolved', reanchorRange: 'Re-select range', delAnn: 'Delete annotation',
+    quickAdded: (i, l, n) => i + ' Added "' + l + '" #' + n + ' (click it to add a note)', addNote: 'Add note',
+    deleted: (n) => '🗑️ Deleted #' + n, undo: 'Undo',
+    notePh: (hint) => hint + '… (Ctrl+Enter to save, Esc to cancel)',
+    orphanLong: '⚠️ Original text not found on the page (it may have changed). Use "Re-select" to re-anchor.',
+    note: 'Note', aiReply: '🤖 AI reply: ', must: 'Must-fix', resolved: 'Resolved',
+    del: 'Delete', reanchorBtn: '🎯 Re-select', reanchorTitle: 'Select new text to re-anchor', cancel: 'Cancel', save: 'Save',
+    added: (i, n) => i + ' Added #' + n, reanchorTip: (n) => '🎯 Select new text to re-anchor #' + n + ' (Esc to cancel)',
+    sideTitle: '📝 Annotations', stats: (o, m, d) => o + ' open (' + m + ' must-fix) · ' + d + ' resolved',
+    all: 'All', showResolved: 'Show resolved', hideMarks: 'Hide on page',
+    empty: ['No annotations yet', 'Select text and right-click, or right-click anywhere', 'Shift+right-click = browser menu'],
+    detail: 'Export detail', levels: { brief: 'Brief', std: 'Standard', full: 'Full' },
+    levelTips: { brief: 'One line each — fewer tokens', std: 'Quote + location + note', full: 'Adds context, selector, timestamps (most robust)' },
+    copy: '📋 Copy for AI', copyTitle: 'Copy review notes as Markdown and paste into your AI chat', jsonTitle: 'Download JSON (your AI can read the file)',
+    importBtn: '⬆️ Import', clear: 'Clear', clearConfirm: (n) => 'Delete all ' + n + ' annotations? (Export JSON first if unsure)',
+    orphanShort: '⚠️ Text not found', regionIn: '🔲 Area in <',
+    copied: (n) => '📋 Copied ' + n + ' notes — paste them into your AI chat', imported: (n) => '⬆️ Imported ' + n, importFail: '⚠️ Import failed: ',
+    welcome: '📝 Review mode: select text or right-click anywhere to annotate (Alt+R for the list)',
+    langBtn: '中', langTitle: '切換成中文',
+    md: {
+      title: '# Review notes: ', count: (n) => ' (' + n + ')', region: 'area', point: 'pin', top: 'top',
+      file: '- File: ', exported: '- Exported: ', summary: (o, m, d) => '- ' + o + ' open (' + m + ' must-fix); ' + d + ' resolved',
+      mustTag: ' [MUST-FIX]', orphan: ' (⚠️ original text no longer found)', loc: '- Location: ', beforeFirst: '(before the first heading)',
+      quote: '- Quote: ', context: '- Context: ', selector: '- Selector: ', content: 'Content', note: '- Note: ', reply: '- AI reply: ',
+      regionLine: (t, s, x, y, w, h) => '- Area: inside `<' + t + '>` "' + s + '", left ' + x + ', top ' + y + ', width ' + w + ', height ' + h,
+      pinLine: (t, s) => '- Pin: `<' + t + '>` "' + s + '"',
+      meta: (id, c, u) => '- id: `' + id + '` · created ' + c + (u ? ' · updated ' + u : ''), resolvedHead: '### Resolved (for reference)',
+    },
+  };
+  const T = LANG === 'zh' ? ZH : EN;
+  function setLang(l) {
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+    const u = new URL(location.href);
+    u.searchParams.delete('p4hlang');
+    location.replace(u.href);
+  }
+
+  const TYPES = {
+    comment:  { icon: '💬', color: '#3b82f6' },
+    rewrite:  { icon: '✏️', color: '#f59e0b' },
+    delete:   { icon: '✂️', color: '#ef4444', quick: true },
+    add:      { icon: '➕', color: '#10b981' },
+    verify:   { icon: '🔍', color: '#8b5cf6' },
+    question: { icon: '❓', color: '#0ea5e9' },
+    style:    { icon: '🎨', color: '#ec4899' },
+    keep:     { icon: '👍', color: '#22c55e', quick: true },
+  };
+  for (const k in TYPES) { const [label, hint, field] = T.types[k]; Object.assign(TYPES[k], { label, hint, field }); }
   const ORDER = Object.keys(TYPES);
 
   let state = load();
@@ -61,7 +177,7 @@
     state.savedAt = Date.now();
     if (!SERVER) {
       try { localStorage.setItem(KEY, serialize()); }
-      catch (e) { toast('⚠️ 無法寫入 localStorage，請記得匯出 JSON'); }
+      catch (e) { toast(T.lsFail); }
     }
     scheduleSync();
   }
@@ -69,12 +185,9 @@
   // ---------- 伺服器同步 ----------
   // 樂觀鎖：POST 帶 baseRev，檔案被別人（例如 AI 寫回覆）改過會回 409，逐則合併後重送
   let sync = SERVER ? 'connecting' : 'local', dirty = false, inflight = false, syncTimer = 0, htmlStamp = null;
-  const SYNC_LABEL = {
-    local: ['⚪', '僅存在此瀏覽器（用「複製給 Claude」或匯出 JSON 交回）'],
-    connecting: ['🟡', '連線中…'], saving: ['🟡', '儲存中…'],
-    synced: ['🟢', '已自動同步到檔案，AI 可直接讀取'],
-    offline: ['🔴', '伺服器離線，改動暫存在頁面，恢復後自動補存'],
-  };
+  const SYNC_ICON = { local: '⚪', connecting: '🟡', saving: '🟡', synced: '🟢', offline: '🔴' };
+  const SYNC_LABEL = {};
+  for (const k in SYNC_ICON) SYNC_LABEL[k] = [SYNC_ICON[k], T.sync[k]];
   const pinsUrl = () => SERVER + 'pins?file=' + encodeURIComponent(FILE);
   function setSync(s) { sync = s; renderFab(); const el = ui.querySelector('.sync'); if (el) el.textContent = SYNC_LABEL[s].join(' '); }
   function stamp(r) {
@@ -135,12 +248,12 @@
       if (cur.rev > state.rev && !menuEl && !editorEl && !dirty && !inflight) {
         const hadReply = cur.annotations.some((a) => a.reply && a.reply !== (byId(a.id) || {}).reply);
         state = cur; render();
-        msg = hadReply ? '🤖 收到 AI 回覆' : '🔄 標記已更新';
+        msg = hadReply ? T.gotReply : T.pinsUpdated;
       }
       if (htmlChanged) {
         htmlChanged = false;
-        toast((msg ? msg + '・' : '') + '📄 報告內容已修改', '重新載入看新版', () => location.reload(), 600000);
-      } else if (msg) toast(msg + '，點標記查看');
+        toast((msg ? msg + T.dot : '') + T.htmlChanged, T.reloadNew, () => location.reload(), 600000);
+      } else if (msg) toast(msg + T.clickToView);
     } catch (e) { setSync('offline'); }
   }
   if (SERVER) {
@@ -395,7 +508,7 @@
   const pinLayer = h('div', { class: 'pins' });
   const ui = h('div', { class: 'ui' });
   root.append(h('style', null, UI_CSS), pinLayer, ui);
-  const fab = h('button', { class: 'fab', title: '審閱標記（Alt+R）', onclick: () => toggleSide() });
+  const fab = h('button', { class: 'fab', title: T.fabTitle, onclick: () => toggleSide() });
   const side = h('div', { class: 'side', style: 'display:none' });
   ui.append(fab, side);
 
@@ -430,7 +543,7 @@
       if (a.kind === 'text' || a._orphan || !visible(a)) continue;
       const t = TYPES[a.type] || TYPES.comment;
       if (a.kind === 'region') {
-        const lab = h('div', { class: 'rl', text: t.icon + ' ' + a._n, title: t.label + (a.note ? '：' + a.note : '') });
+        const lab = h('div', { class: 'rl', text: t.icon + ' ' + a._n, title: t.label + (a.note ? T.colon + a.note : '') });
         lab.dataset.p4h = a.id;
         lab.addEventListener('click', (e) => openEditor(a, e.clientX, e.clientY));
         const box = h('div', { class: 'region' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''), style: '--c:' + t.color }, lab);
@@ -440,7 +553,7 @@
       }
       const p = h('div', {
         class: 'pin' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''),
-        style: '--c:' + t.color, title: (t.label + (a.note ? '：' + a.note : '')) + '\n（可拖曳移動）',
+        style: '--c:' + t.color, title: (t.label + (a.note ? T.colon + a.note : '')) + '\n' + T.dragHint,
         text: t.icon + ' ' + a._n,
       });
       p.dataset.p4h = a.id;
@@ -469,10 +582,10 @@
     const open = state.annotations.filter((a) => !a.resolved);
     const must = open.filter((a) => a.priority === 'must').length;
     fab.textContent = '📝 ' + open.length;
-    fab.title = '審閱標記（Alt+R）\n' + SYNC_LABEL[sync].join(' ');
+    fab.title = T.fabTitle + '\n' + SYNC_LABEL[sync].join(' ');
     if (sync !== 'local') fab.prepend(h('span', { style: 'margin-right:6px;font-size:10px;vertical-align:middle', text: SYNC_LABEL[sync][0] }));
     if (must) fab.appendChild(h('span', { class: 'm', text: '●' + must }));
-    if (hidden) fab.appendChild(h('span', { style: 'margin-left:6px;opacity:.6', text: '（已隱藏）' }));
+    if (hidden) fab.appendChild(h('span', { style: 'margin-left:6px;opacity:.6', text: T.hiddenTag }));
   }
 
   // ---------- 拖曳圖釘 ----------
@@ -551,7 +664,7 @@
   function startDraw() {
     closeMenu(); closeEditor();
     const box = h('div', { class: 'box', style: 'display:none' });
-    const ov = h('div', { class: 'drawov' }, box, h('div', { class: 'tip', text: '🔲 拖曳框出要標記的區域（Esc 取消）' }));
+    const ov = h('div', { class: 'drawov' }, box, h('div', { class: 'tip', text: T.drawTip }));
     let sx = 0, sy = 0, on = false;
     ov.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return;
@@ -568,7 +681,7 @@
     ov.addEventListener('pointerup', (e) => {
       if (!on) return;
       on = false; ov.remove(); drawCancel = null;
-      if (Math.abs(e.clientX - sx) < 8 || Math.abs(e.clientY - sy) < 8) { toast('區域太小，已取消'); return; }
+      if (Math.abs(e.clientX - sx) < 8 || Math.abs(e.clientY - sy) < 8) { toast(T.tooSmall); return; }
       openCreateMenu(e.clientX, e.clientY, regionAnchor(sx, sy, e.clientX, e.clientY));
     });
     ov.addEventListener('contextmenu', (e) => { e.preventDefault(); ov.remove(); drawCancel = null; });
@@ -581,9 +694,8 @@
   function openCreateMenu(x, y, anchor) {
     closeMenu(); closeEditor();
     const head = anchor.kind === 'text'
-      ? '標記選取：「' + anchor.quote.slice(0, 24) + (anchor.quote.length > 24 ? '…' : '') + '」'
-      : anchor.kind === 'region' ? '標記框選區域（' + anchor.tag + ' 內）'
-      : '在此處釘一個標記（虛線框＝會附著的元素 ' + anchor.tag + '）';
+      ? T.headText(anchor.quote.slice(0, 24) + (anchor.quote.length > 24 ? '…' : ''))
+      : anchor.kind === 'region' ? T.headRegion(anchor.tag) : T.headPin(anchor.tag);
     menuEl = h('div', { class: 'pop menu' }, h('div', { class: 'hd', text: head }),
       ORDER.map((k, i) => {
         const t = TYPES[k];
@@ -593,9 +705,9 @@
       }),
       h('div', { class: 'sep' }),
       anchor.kind === 'region' ? null : h('div', { class: 'item', onclick: startDraw },
-        h('span', { class: 'ic', text: '🔲' }), h('span', { text: '改成框選區域…' }), h('span', { class: 'k', text: 'Alt+D' })),
+        h('span', { class: 'ic', text: '🔲' }), h('span', { text: T.toRegion }), h('span', { class: 'k', text: 'Alt+D' })),
       h('div', { class: 'item', onclick: () => { closeMenu(); toggleSide(true); } },
-        h('span', { class: 'ic', text: '📋' }), h('span', { text: '開啟標記清單' }), h('span', { class: 'k', text: 'Alt+R' })));
+        h('span', { class: 'ic', text: '📋' }), h('span', { text: T.openList }), h('span', { class: 'k', text: 'Alt+R' })));
     menuEl._keys = (e) => { const i = +e.key - 1; if (i >= 0 && i < ORDER.length) { create(ORDER[i], anchor, x, y); return true; } };
     place(menuEl, x, y);
     showTarget(anchor);
@@ -606,18 +718,18 @@
     const item = (ic, label, fn, cls) => h('div', { class: 'item' + (cls ? ' ' + cls : ''), onclick: () => { closeMenu(); fn(); } },
       h('span', { class: 'ic', text: ic }), h('span', { text: label }));
     menuEl = h('div', { class: 'pop menu' },
-      h('div', { class: 'hd', text: '#' + a._n + ' ' + t.icon + ' ' + t.label + (a.note ? '：' + a.note : '') }),
-      item('📝', '編輯…', () => openEditor(a, x, y)),
+      h('div', { class: 'hd', text: '#' + a._n + ' ' + t.icon + ' ' + t.label + (a.note ? T.colon + a.note : '') }),
+      item('📝', T.edit, () => openEditor(a, x, y)),
       h('div', { class: 'row' }, ORDER.map((k) => h('button', {
-        class: 'ib', title: '改成「' + TYPES[k].label + '」', text: TYPES[k].icon,
+        class: 'ib', title: T.changeTo(TYPES[k].label), text: TYPES[k].icon,
         onclick: () => { closeMenu(); a.type = k; touch(a); },
       }))),
       h('div', { class: 'sep' }),
-      item(a.priority === 'must' ? '⚪' : '🔴', a.priority === 'must' ? '取消必改' : '標為必改', () => { a.priority = a.priority === 'must' ? 'should' : 'must'; touch(a); }),
-      item(a.resolved ? '↩️' : '✅', a.resolved ? '重新開啟' : '標為已解決', () => { a.resolved = !a.resolved; touch(a); }),
-      item('🎯', '重新框選範圍', () => startReanchor(a)),
+      item(a.priority === 'must' ? '⚪' : '🔴', a.priority === 'must' ? T.unmust : T.setMust, () => { a.priority = a.priority === 'must' ? 'should' : 'must'; touch(a); }),
+      item(a.resolved ? '↩️' : '✅', a.resolved ? T.reopen : T.setResolved, () => { a.resolved = !a.resolved; touch(a); }),
+      item('🎯', T.reanchorRange, () => startReanchor(a)),
       h('div', { class: 'sep' }),
-      item('🗑️', '刪除標記', () => remove(a), 'dan'));
+      item('🗑️', T.delAnn, () => remove(a), 'dan'));
     place(menuEl, x, y);
   }
   function touch(a) { a.updated = Date.now(); render(); save(); }
@@ -628,14 +740,14 @@
     window.getSelection().removeAllRanges();
     if (TYPES[type].quick) {
       state.annotations.push(a); render(); save();
-      toast(TYPES[type].icon + ' 已新增「' + TYPES[type].label + '」#' + a._n + '（點標記可補說明）', '補說明', () => openEditor(a, x, y));
+      toast(T.quickAdded(TYPES[type].icon, TYPES[type].label, a._n), T.addNote, () => openEditor(a, x, y));
     } else openEditor(a, x, y, true);
   }
   function remove(a) {
     const i = state.annotations.indexOf(a);
     if (i < 0) return;
     state.annotations.splice(i, 1); state.deleted.push(a.id); render(); save(); closeEditor();
-    toast('🗑️ 已刪除標記 #' + a._n, '復原', () => {
+    toast(T.deleted(a._n), T.undo, () => {
       state.annotations.splice(i, 0, a); state.deleted = state.deleted.filter((d) => d !== a.id);
       a.updated = Date.now(); render(); save();
     });
@@ -650,7 +762,7 @@
       const t = TYPES[draft.type];
       ed.style.setProperty('--c', t.color);
       ed.textContent = '';
-      const note = h('textarea', { placeholder: t.hint + '…（Ctrl+Enter 儲存，Esc 取消）' });
+      const note = h('textarea', { placeholder: T.notePh(t.hint) });
       note.value = draft.note; note.oninput = () => (draft.note = note.value);
       let rep = null;
       if (t.field) {
@@ -665,26 +777,26 @@
         a.kind === 'text'
           ? h('div', { class: 'quote', text: a.quote })
           : h('div', { class: 'quote', text: (a.kind === 'region' ? '🔲 ' : '📍 ') + (a.heading ? '§ ' + a.heading + ' — ' : '') + '<' + a.tag + '> ' + (a.snippet || '') }),
-        a._orphan ? h('div', { class: 'lbl', style: 'color:#d97706', text: '⚠️ 頁面上找不到原文（內容可能已被修改），可用「重新框選」重新定位' }) : null,
+        a._orphan ? h('div', { class: 'lbl', style: 'color:#d97706', text: T.orphanLong }) : null,
         rep ? h('div', { class: 'lbl', text: t.field }) : null, rep,
-        h('div', { class: 'lbl', text: '說明' }), note,
-        a.reply ? h('div', { class: 'reply', text: '🤖 Claude 回覆：' + a.reply }) : null,
+        h('div', { class: 'lbl', text: T.note }), note,
+        a.reply ? h('div', { class: 'reply', text: T.aiReply + a.reply }) : null,
         h('div', { class: 'flags' },
-          h('label', null, h('input', { type: 'checkbox', checked: draft.priority === 'must', onchange: (e) => (draft.priority = e.target.checked ? 'must' : 'should') }), '🔴 必改'),
-          h('label', null, h('input', { type: 'checkbox', checked: draft.resolved, onchange: (e) => (draft.resolved = e.target.checked) }), '✅ 已解決')),
+          h('label', null, h('input', { type: 'checkbox', checked: draft.priority === 'must', onchange: (e) => (draft.priority = e.target.checked ? 'must' : 'should') }), '🔴 ' + T.must),
+          h('label', null, h('input', { type: 'checkbox', checked: draft.resolved, onchange: (e) => (draft.resolved = e.target.checked) }), '✅ ' + T.resolved)),
         h('div', { class: 'btns' },
-          isNew ? null : h('button', { class: 'btn dan', text: '刪除', onclick: () => remove(a) }),
-          isNew ? null : h('button', { class: 'btn', text: '🎯 重新框選', title: '選取新的文字範圍來重新定位', onclick: () => startReanchor(a) }),
+          isNew ? null : h('button', { class: 'btn dan', text: T.del, onclick: () => remove(a) }),
+          isNew ? null : h('button', { class: 'btn', text: T.reanchorBtn, title: T.reanchorTitle, onclick: () => startReanchor(a) }),
           h('span', { class: 'sp' }),
-          h('button', { class: 'btn', text: '取消', onclick: closeEditor }),
-          h('button', { class: 'btn pri', text: '儲存', onclick: commit }))].filter(Boolean));
+          h('button', { class: 'btn', text: T.cancel, onclick: closeEditor }),
+          h('button', { class: 'btn pri', text: T.save, onclick: commit }))].filter(Boolean));
       (rep && !draft.replacement && draft.type === 'rewrite' ? rep : note).focus();
     };
     const commit = () => {
       Object.assign(a, draft, { updated: Date.now() });
       if (isNew) state.annotations.push(a);
       closeEditor(); render(); save();
-      if (isNew) toast((TYPES[a.type].icon) + ' 已新增 #' + a._n);
+      if (isNew) toast(T.added(TYPES[a.type].icon, a._n));
     };
     ed._keys = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { commit(); return true; } };
     editorEl = ed;
@@ -698,7 +810,7 @@
   function startReanchor(a) {
     closeEditor(); closeMenu();
     reanchorId = a.id;
-    toast('🎯 請選取新的文字範圍來定位 #' + a._n + '（Esc 取消）', '取消', () => { reanchorId = null; }, 60000);
+    toast(T.reanchorTip(a._n), T.cancel, () => { reanchorId = null; }, 60000);
   }
   document.addEventListener('mouseup', (e) => {
     if (!reanchorId || e.composedPath().includes(host)) return;
@@ -735,34 +847,35 @@
       h('input', { type: 'checkbox', checked: val, onchange: (e) => fn(e.target.checked) }), label);
     side.append(
       h('div', { class: 'sh' },
-        h('div', { class: 'st' }, '📝 審閱標記', h('button', { class: 'btn x', text: '✕', onclick: () => toggleSide(false) })),
-        h('div', { class: 'sub', text: '未解決 ' + open.length + ' 則（必改 ' + must + '）・已解決 ' + (all.length - open.length) + ' 則' }),
+        h('div', { class: 'st' }, T.sideTitle,
+          h('button', { class: 'btn x', text: T.langBtn, title: T.langTitle, onclick: () => setLang(LANG === 'zh' ? 'en' : 'zh') }),
+          h('button', { class: 'btn', style: 'margin-left:6px', text: '✕', onclick: () => toggleSide(false) })),
+        h('div', { class: 'sub', text: T.stats(open.length, must, all.length - open.length) }),
         h('div', { class: 'sub sync', text: SYNC_LABEL[sync].join(' ') }),
         h('div', { class: 'chips' },
-          h('button', { class: 'chip' + (!filterType ? ' on' : ''), style: '--c:#6b7280', text: '全部', onclick: () => { filterType = null; renderSide(); } }),
+          h('button', { class: 'chip' + (!filterType ? ' on' : ''), style: '--c:#6b7280', text: T.all, onclick: () => { filterType = null; renderSide(); } }),
           ORDER.filter((k) => all.some((a) => a.type === k)).map((k) => h('button', {
             class: 'chip' + (filterType === k ? ' on' : ''), style: '--c:' + TYPES[k].color,
             text: TYPES[k].icon + ' ' + all.filter((a) => a.type === k).length,
             onclick: () => { filterType = filterType === k ? null : k; renderSide(); },
           }))),
         h('div', { class: 'flags' },
-          chk('顯示已解決', showResolved, (v) => { showResolved = v; render(); }),
-          chk('隱藏頁面標記', hidden, (v) => { hidden = v; render(); }))),
+          chk(T.showResolved, showResolved, (v) => { showResolved = v; render(); }),
+          chk(T.hideMarks, hidden, (v) => { hidden = v; render(); }))),
       h('div', { class: 'list' }, list.length ? list.map(card) : h('div', { class: 'empty' },
-        '還沒有標記', h('br'), '選取文字後按右鍵，或直接在任意位置按右鍵', h('br'), 'Shift+右鍵 = 原生選單')),
+        T.empty[0], h('br'), T.empty[1], h('br'), T.empty[2])),
       h('div', { class: 'sf' },
         h('div', { style: 'display:flex;align-items:center;gap:6px;width:100%' },
-          h('span', { class: 'lbl', text: '輸出詳細度' }),
-          h('div', { class: 'seg' }, [['brief', '精簡'], ['std', '標準'], ['full', '詳細']].map(([k, l]) => h('button', {
-            class: detail === k ? 'on' : '', text: l,
-            title: { brief: '一則一行，省 token', std: '原文＋位置＋說明', full: '再加上下文、選擇器、時間（定位最穩）' }[k],
+          h('span', { class: 'lbl', text: T.detail }),
+          h('div', { class: 'seg' }, ['brief', 'std', 'full'].map((k) => h('button', {
+            class: detail === k ? 'on' : '', text: T.levels[k], title: T.levelTips[k],
             onclick: () => { detail = k; try { localStorage.setItem(PREF, k); } catch (e) {} renderSide(); },
           })))),
-        h('button', { class: 'btn pri', text: '📋 複製給 Claude', title: '複製 Markdown 審閱意見，貼到對話即可', onclick: copyMd }),
-        h('button', { class: 'btn', text: '⬇️ JSON', title: '下載 JSON（Claude 可直接讀檔）', onclick: downloadJson }),
-        h('button', { class: 'btn', text: '⬆️ 匯入', onclick: importJson }),
-        h('button', { class: 'btn dan', text: '清空', onclick: () => {
-          if (!state.annotations.length || !confirm('確定清空全部 ' + state.annotations.length + ' 則標記？（建議先匯出 JSON）')) return;
+        h('button', { class: 'btn pri', text: T.copy, title: T.copyTitle, onclick: copyMd }),
+        h('button', { class: 'btn', text: '⬇️ JSON', title: T.jsonTitle, onclick: downloadJson }),
+        h('button', { class: 'btn', text: T.importBtn, onclick: importJson }),
+        h('button', { class: 'btn dan', text: T.clear, onclick: () => {
+          if (!state.annotations.length || !confirm(T.clearConfirm(state.annotations.length))) return;
           state.deleted.push(...state.annotations.map((a) => a.id)); state.annotations = []; render(); save();
         } })));
   }
@@ -771,11 +884,11 @@
     return h('div', { class: 'card' + (a.resolved ? ' res' : ''), style: '--c:' + t.color, onclick: (e) => focusAnn(a) },
       h('div', { class: 'ct' },
         h('span', { class: 'n', text: '#' + a._n }), t.icon + ' ' + t.label,
-        a.priority === 'must' ? h('span', { class: 'must', text: '必改' }) : null,
+        a.priority === 'must' ? h('span', { class: 'must', text: T.must }) : null,
         a.resolved ? h('span', { text: '✅' }) : null,
-        a._orphan ? h('span', { class: 'orph', text: '⚠️ 找不到原文' }) : null,
+        a._orphan ? h('span', { class: 'orph', text: T.orphanShort }) : null,
         a.heading ? h('span', { class: 'loc', text: '§ ' + a.heading }) : null),
-      h('div', { class: 'cq', text: a.kind === 'text' ? '「' + a.quote + '」' : (a.kind === 'region' ? '🔲 區域 in <' : '📍 <') + a.tag + '> ' + (a.snippet || '') }),
+      h('div', { class: 'cq', text: a.kind === 'text' ? T.lq + a.quote + T.rq : (a.kind === 'region' ? T.regionIn : '📍 <') + a.tag + '> ' + (a.snippet || '') }),
       a.replacement ? h('div', { class: 'cn', text: '→ ' + a.replacement }) : null,
       a.note ? h('div', { class: 'cn', text: a.note }) : null,
       a.reply ? h('div', { class: 'cq', text: '🤖 ' + a.reply }) : null);
@@ -798,43 +911,44 @@
     level = level || detail;
     const all = sorted(), open = all.filter((a) => !a.resolved), done = all.filter((a) => a.resolved);
     const must = open.filter((a) => a.priority === 'must').length;
+    const M = T.md, q = (s) => T.lq + s + T.rq, ws = (s) => (s || '').replace(/\s+/g, ' ');
     if (level === 'brief') {
-      const L = ['# 審閱意見：' + (document.title || fileName()) + '（' + open.length + ' 則）'];
+      const L = [M.title + (document.title || fileName()) + M.count(open.length)];
       for (const a of open) {
         const t = TYPES[a.type] || TYPES.comment;
-        const where = a.kind === 'text' ? '「' + a.quote.replace(/\s+/g, ' ').slice(0, 60) + '」' : '[' + (a.kind === 'region' ? '區域' : '位置') + ' § ' + (a.heading || '開頭') + ' <' + a.tag + '>]';
+        const where = a.kind === 'text' ? q(ws(a.quote).slice(0, 60)) : '[' + (a.kind === 'region' ? M.region : M.point) + ' § ' + (a.heading || M.top) + ' <' + a.tag + '>]';
         L.push(a._n + '. ' + t.icon + t.label + (a.priority === 'must' ? '❗' : '') + ' ' + where +
-          (a.replacement ? ' → 「' + a.replacement + '」' : '') + (a.note ? ' — ' + a.note.replace(/\n/g, ' ') : ''));
+          (a.replacement ? ' → ' + q(a.replacement) : '') + (a.note ? ' — ' + a.note.replace(/\n/g, ' ') : ''));
       }
       return L.join('\n');
     }
     const full = level === 'full';
-    const L = ['# 審閱意見：' + (document.title || fileName()), '',
-      '- 檔案：`' + decodeURIComponent(location.pathname).replace(/^\/([A-Za-z]:)/, '$1') + '`',
-      '- 匯出：' + new Date().toLocaleString(),
-      '- 未解決 ' + open.length + ' 則（必改 ' + must + '）；已解決 ' + done.length + ' 則', ''];
+    const L = [M.title + (document.title || fileName()), '',
+      M.file + '`' + decodeURIComponent(location.pathname).replace(/^\/([A-Za-z]:)/, '$1') + '`',
+      M.exported + new Date().toLocaleString(),
+      M.summary(open.length, must, done.length), ''];
     const one = (a) => {
       const t = TYPES[a.type] || TYPES.comment;
-      L.push('## ' + a._n + '. ' + t.icon + ' ' + t.label + (a.priority === 'must' ? '【必改】' : '') + (a._orphan ? '（⚠️ 頁面上已找不到原文）' : ''));
-      L.push('- 位置：' + (a.heading ? '§ ' + a.heading : '（第一個標題之前）'));
+      L.push('## ' + a._n + '. ' + t.icon + ' ' + t.label + (a.priority === 'must' ? M.mustTag : '') + (a._orphan ? M.orphan : ''));
+      L.push(M.loc + (a.heading ? '§ ' + a.heading : M.beforeFirst));
       const pct = (v) => Math.round(v * 100) + '%';
       if (a.kind === 'text') {
-        L.push('- 原文：「' + a.quote.replace(/\s+/g, ' ') + '」');
-        if (full) L.push('- 上下文：…' + (a.prefix || '').replace(/\s+/g, ' ') + '【' + a.quote.replace(/\s+/g, ' ') + '】' + (a.suffix || '').replace(/\s+/g, ' ') + '…');
+        L.push(M.quote + q(ws(a.quote)));
+        if (full) L.push(M.context + '…' + ws(a.prefix) + '【' + ws(a.quote) + '】' + ws(a.suffix) + '…');
       } else if (a.kind === 'region') {
-        L.push('- 框選區域：`<' + a.tag + '>`「' + (a.snippet || '') + '」內，左 ' + pct(a.rx) + '、上 ' + pct(a.ry) + '、寬 ' + pct(a.rw) + '、高 ' + pct(a.rh));
+        L.push(M.regionLine(a.tag, a.snippet || '', pct(a.rx), pct(a.ry), pct(a.rw), pct(a.rh)));
       } else {
-        L.push('- 標記點：`<' + a.tag + '>`「' + (a.snippet || '') + '」');
+        L.push(M.pinLine(a.tag, a.snippet || ''));
       }
-      if (full && a.path) L.push('- 選擇器：`' + a.path + '`');
-      if (a.replacement) L.push('- ' + (t.field || '內容') + '：「' + a.replacement + '」');
-      if (a.note) L.push('- 說明：' + a.note.replace(/\n/g, '\n  '));
-      if (a.reply) L.push('- Claude 回覆：' + a.reply);
-      if (full) L.push('- id：`' + a.id + '`・建立 ' + new Date(a.created).toLocaleString() + (a.updated ? '・更新 ' + new Date(a.updated).toLocaleString() : ''));
+      if (full && a.path) L.push(M.selector + '`' + a.path + '`');
+      if (a.replacement) L.push('- ' + (t.field || M.content) + T.colon + q(a.replacement));
+      if (a.note) L.push(M.note + a.note.replace(/\n/g, '\n  '));
+      if (a.reply) L.push(M.reply + a.reply);
+      if (full) L.push(M.meta(a.id, new Date(a.created).toLocaleString(), a.updated && new Date(a.updated).toLocaleString()));
       L.push('');
     };
     open.forEach(one);
-    if (done.length) { L.push('---', '', '### 已解決（僅供參考）', ''); done.forEach(one); }
+    if (done.length) { L.push('---', '', M.resolvedHead, ''); done.forEach(one); }
     return L.join('\n');
   }
   async function copyMd() {
@@ -844,7 +958,7 @@
       const ta = h('textarea', { style: 'position:fixed;left:-9999px' }); ta.value = md;
       document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
     }
-    toast('📋 已複製 ' + state.annotations.filter((a) => !a.resolved).length + ' 則意見，貼到 Claude 對話即可');
+    toast(T.copied(state.annotations.filter((a) => !a.resolved).length));
   }
   function downloadJson() {
     const blob = new Blob([serialize({ file: decodeURIComponent(location.pathname), title: document.title, exportedAt: new Date().toISOString() })], { type: 'application/json' });
@@ -864,8 +978,8 @@
           if (i >= 0) state.annotations[i] = a; else state.annotations.push(a);
           n++;
         }
-        render(); save(); toast('⬆️ 已匯入 ' + n + ' 則');
-      } catch (e) { toast('⚠️ 匯入失敗：' + e.message); }
+        render(); save(); toast(T.imported(n));
+      } catch (e) { toast(T.importFail + e.message); }
     };
     ui.appendChild(inp); inp.click(); inp.remove();
   }
@@ -943,8 +1057,8 @@
     }
     render();
     addEventListener('load', render);
-    if (!state.annotations.length) toast('📝 審閱模式：選取文字或直接按右鍵新增標記（Alt+R 開清單）', null, null, 6000);
+    if (!state.annotations.length) toast(T.welcome, null, null, 6000);
   }
-  window.pin4html = { get state() { return state; }, get sync() { return sync; }, toMarkdown, render, open: () => toggleSide(true) };
+  window.pin4html = { get state() { return state; }, get sync() { return sync; }, lang: LANG, setLang, toMarkdown, render, open: () => toggleSide(true) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

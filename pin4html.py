@@ -34,9 +34,13 @@ CDN = 'https://cdn.jsdelivr.net/gh/youllook/Pin4Html@1/pin4html.js'
 START, END = '<!-- pin4html:start -->', '<!-- pin4html:end -->'
 BLOCK_RE = re.compile(re.escape(START) + r'.*?' + re.escape(END) + r'\s*', re.S)
 TYPES = {
-    'comment': '💬留言', 'rewrite': '✏️改寫', 'delete': '✂️刪除', 'add': '➕補充',
-    'verify': '🔍查證', 'question': '❓疑問', 'style': '🎨版面', 'keep': '👍保留',
+    'comment': '💬 comment', 'rewrite': '✏️ rewrite', 'delete': '✂️ delete', 'add': '➕ add',
+    'verify': '🔍 verify', 'question': '❓ question', 'style': '🎨 layout', 'keep': '👍 keep',
 }
+
+
+def lang_attr(lang):
+    return f' data-lang="{lang}"' if lang else ''
 LOCK = threading.Lock()
 
 
@@ -86,6 +90,7 @@ def write_json(p: Path, data: dict):
 class Handler(SimpleHTTPRequestHandler):
     root: Path = Path('.')
     default: str = ''
+    lang: str = ''
 
     def log_message(self, *args):
         pass
@@ -138,7 +143,7 @@ class Handler(SimpleHTTPRequestHandler):
         local = self._local(path)
         if local and local.is_file() and local.suffix.lower() in ('.html', '.htm'):
             html = BLOCK_RE.sub('', read_text(local))
-            tag = '<script src="/__pin4html/pin4html.js" data-server="/__pin4html/"></script>\n'
+            tag = f'<script src="/__pin4html/pin4html.js" data-server="/__pin4html/"{lang_attr(self.lang)}></script>\n'
             self._send(200, insert_before_body_end(html, tag).encode('utf-8'), 'text/html; charset=utf-8')
             return
         super().do_GET()
@@ -183,15 +188,16 @@ def free_port(preferred: int) -> int:
 def cmd_serve(a):
     html = Path(a.html).resolve()
     if not html.exists():
-        sys.exit(f'找不到檔案：{html}')
+        sys.exit(f'File not found: {html}')
     Handler.root = html.parent
     Handler.default = html.name
+    Handler.lang = a.lang or ''
     port = free_port(a.port)
     srv = ThreadingHTTPServer(('127.0.0.1', port), partial(Handler, directory=str(html.parent)))
     url = f'http://127.0.0.1:{srv.server_port}/{quote(html.name)}'
-    print(f'Pin4Html 伺服器啟動：{url}')
-    print(f'標記即時寫入：{sidecar(html)}')
-    print('Ctrl+C 結束', flush=True)
+    print(f'Pin4Html serving: {url}')
+    print(f'Pins auto-save to: {sidecar(html)}')
+    print('Ctrl+C to stop', flush=True)
     if not a.no_open:
         webbrowser.open(url)
     try:
@@ -209,22 +215,22 @@ def cmd_inject(a):
         payload = json.dumps(json.loads(read_text(Path(a.data))), ensure_ascii=False).replace('</', '<\\/')
         block += f'<script type="application/json" id="pin4html-data">{payload}</script>\n'
     if a.cdn:
-        block += f'<script src="{CDN}"></script>\n'
+        block += f'<script src="{CDN}"{lang_attr(a.lang)}></script>\n'
     else:
-        block += '<script>\n' + JS.read_text(encoding='utf-8').replace('</script', '<\\/script') + '\n</script>\n'
+        block += f'<script{lang_attr(a.lang)}>\n' + JS.read_text(encoding='utf-8').replace('</script', '<\\/script') + '\n</script>\n'
     block += END + '\n'
     html = insert_before_body_end(html, block)
     out = src if a.inplace else Path(a.out).resolve() if a.out else src.with_name(
         re.sub(r'\.review$', '', src.stem) + '.review' + src.suffix)
     out.write_text(html, encoding='utf-8')
-    print(f'已產生審閱版 → {out}')
+    print(f'Review copy written: {out}')
 
 
 def cmd_strip(a):
     src = Path(a.html).resolve()
     out = Path(a.out).resolve() if a.out else src
     out.write_text(BLOCK_RE.sub('', read_text(src)), encoding='utf-8')
-    print(f'已移除標註器 → {out}')
+    print(f'Annotator removed: {out}')
 
 
 # ---------- show / reply ----------
@@ -239,26 +245,26 @@ def cmd_show(a):
     items = sorted(data.get('annotations', []), key=lambda x: (x.get('n') or 1e9, x.get('created', 0)))
     if not a.all:
         items = [x for x in items if not x.get('resolved')]
-    print(f'# {p.name}  rev={data.get("rev", 0)}  共 {len(items)} 則{"" if a.all else "未解決"}')
+    print(f'# {p.name}  rev={data.get("rev", 0)}  {len(items)} {"total" if a.all else "open"}')
     for x in items:
         t = TYPES.get(x.get('type'), x.get('type'))
-        flag = '【必改】' if x.get('priority') == 'must' else ''
-        done = '✅' if x.get('resolved') else ''
-        print(f'\n## #{x.get("n", "?")} {t}{flag}{done}  id={x["id"]}  § {x.get("heading") or "（開頭）"}')
+        flag = ' [MUST-FIX]' if x.get('priority') == 'must' else ''
+        done = ' ✅' if x.get('resolved') else ''
+        print(f'\n## #{x.get("n", "?")} {t}{flag}{done}  id={x["id"]}  § {x.get("heading") or "(top)"}')
         if x.get('kind') == 'text':
-            print(f'  原文：「{x.get("quote", "")}」')
-            print(f'  上下文：…{x.get("prefix", "")}【{x.get("quote", "")}】{x.get("suffix", "")}…'.replace('\n', ' '))
+            print(f'  quote: "{x.get("quote", "")}"')
+            print(f'  context: …{x.get("prefix", "")}【{x.get("quote", "")}】{x.get("suffix", "")}…'.replace('\n', ' '))
         elif x.get('kind') == 'region':
-            print(f'  區域：<{x.get("tag")}>「{x.get("snippet", "")}」 {x.get("path")}  '
+            print(f'  area: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}  '
                   f'x={x.get("rx", 0):.0%} y={x.get("ry", 0):.0%} w={x.get("rw", 0):.0%} h={x.get("rh", 0):.0%}')
         else:
-            print(f'  位置：<{x.get("tag")}>「{x.get("snippet", "")}」 {x.get("path")}')
+            print(f'  pin: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}')
         if x.get('replacement'):
-            print(f'  替換／補充：「{x["replacement"]}」')
+            print(f'  replacement: "{x["replacement"]}"')
         if x.get('note'):
-            print(f'  說明：{x["note"]}')
+            print(f'  note: {x["note"]}')
         if x.get('reply'):
-            print(f'  已回覆：{x["reply"]}')
+            print(f'  replied: {x["reply"]}')
 
 
 def cmd_reply(a):
@@ -272,7 +278,7 @@ def cmd_reply(a):
         for key, val in replies.items():
             ann = next((x for x in anns if x['id'] == key or str(x.get('n')) == str(key).lstrip('#')), None)
             if not ann:
-                print(f'⚠️ 找不到標記 {key}')
+                print(f'⚠️ Pin not found: {key}')
                 continue
             if isinstance(val, str):
                 val = {'reply': val}
@@ -284,7 +290,7 @@ def cmd_reply(a):
         data['rev'] = data.get('rev', 0) + 1
         data['savedAt'] = now
         write_json(p, data)
-    print(f'已寫入 {hit} 則回覆 → {p}（rev {data["rev"]}）')
+    print(f'Wrote {hit} replies → {p} (rev {data["rev"]})')
 
 
 def main():
@@ -292,9 +298,11 @@ def main():
     ap = argparse.ArgumentParser(description='Pin4Html — annotate HTML reports for your AI')
     sub = ap.add_subparsers(dest='cmd', required=True)
     s = sub.add_parser('serve'); s.add_argument('html'); s.add_argument('--port', type=int, default=8770)
-    s.add_argument('--no-open', action='store_true'); s.set_defaults(fn=cmd_serve)
+    s.add_argument('--no-open', action='store_true'); s.add_argument('--lang', choices=['zh', 'en'], help='force UI language')
+    s.set_defaults(fn=cmd_serve)
     s = sub.add_parser('inject'); s.add_argument('html'); s.add_argument('--out'); s.add_argument('--inplace', action='store_true')
-    s.add_argument('--cdn', action='store_true'); s.add_argument('--data'); s.set_defaults(fn=cmd_inject)
+    s.add_argument('--cdn', action='store_true'); s.add_argument('--data'); s.add_argument('--lang', choices=['zh', 'en'])
+    s.set_defaults(fn=cmd_inject)
     s = sub.add_parser('strip'); s.add_argument('html'); s.add_argument('--out'); s.set_defaults(fn=cmd_strip)
     s = sub.add_parser('show'); s.add_argument('html'); s.add_argument('--all', action='store_true'); s.set_defaults(fn=cmd_show)
     s = sub.add_parser('reply'); s.add_argument('html'); s.add_argument('--file', required=True); s.set_defaults(fn=cmd_reply)
