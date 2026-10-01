@@ -22,7 +22,10 @@ next to the report, and lets the agent write replies back that show up on the pa
 python pin4html.py serve report.html
 ```
 
-Your browser opens the report. Then:
+Your browser opens the report. Want to look around first? `python pin4html.py serve examples/showcase-en.html`
+opens a sample report with every annotation type already placed (including a resolved AI reply).
+
+Then, on your own report:
 
 | Action | Result |
 |---|---|
@@ -116,6 +119,7 @@ See [`examples/demo-en.pins.json`](examples/demo-en.pins.json). Each annotation:
 python pin4html.py serve report.html
 ```
 
+- **先看範例**：`python pin4html.py serve examples/showcase.html`，每種標記都已標好（含一則 AI 已回覆並解決）
 - **操作**：選文字＋右鍵＝文字標記；空白處右鍵＝圖釘；`Alt+D`＝框選區域；`Alt+R`＝清單；`Alt+H`＝隱藏標記；`Shift`＋右鍵＝原生選單
 - **類型**：留言、改寫、刪除、補充、查證、疑問、版面、保留，另有必改、已解決；頁面上以細底線＋`[n]` 編號呈現（必改＝紅色實心編號）
 - **交給 AI**：`show` 讀標記、`reply --file replies.json` 寫回覆，開著的頁面約 2 秒內出現「收到 AI 回覆」

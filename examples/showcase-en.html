@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q3 Growth Review — Lumen Notes</title>
+<style>
+  :root{--fg:#1f2328;--mut:#5b6370;--bd:#e3e6ea;--soft:#f6f7f9;--acc:#3563e9}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:800px;margin:48px auto 80px;padding:0 20px;color:var(--fg);line-height:1.7;font-size:16px;background:#fff}
+  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);font-weight:600;margin:0}
+  h1{font-size:30px;line-height:1.25;margin:6px 0 4px}
+  .meta{color:var(--mut);font-size:14px;margin:0 0 24px}
+  h2{font-size:20px;margin:36px 0 8px;padding-top:4px}
+  .lead{font-size:17px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0 8px}
+  .kpi{border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+  .kpi .l{font-size:12px;color:var(--mut)}
+  .kpi .v{font-size:24px;font-weight:600;line-height:1.3}
+  .kpi .d{font-size:12px;font-weight:600}
+  .up{color:#1a7f37}.down{color:#cf222e}
+  figure{margin:16px 0 4px;padding:16px 18px 10px;background:var(--soft);border-radius:12px}
+  figcaption{font-size:13px;color:var(--mut);margin-top:6px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+  th,td{border-bottom:1px solid var(--bd);padding:7px 10px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{font-weight:600;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  ul{padding-left:20px}li{margin:4px 0}
+  .callout{border-left:3px solid var(--acc);background:#f3f6fe;padding:10px 14px;border-radius:0 8px 8px 0;font-size:15px}
+</style>
+</head>
+<body>
+<p class="eyebrow">Quarterly business review</p>
+<h1>Lumen Notes — Q3 Growth Review</h1>
+<p class="meta">Prepared by the Growth team · October 2026 · Draft for leadership review</p>
+
+<p class="lead">Q3 was our strongest quarter yet: paid subscribers grew 34% quarter over quarter, driven by the new AI summaries feature and the student plan launched in August.</p>
+
+<div class="kpis">
+  <div class="kpi" id="kpi-subs"><div class="l">Paid subscribers</div><div class="v">48,200</div><div class="d up">▲ 34% QoQ</div></div>
+  <div class="kpi" id="kpi-mrr"><div class="l">MRR</div><div class="v">$412k</div><div class="d up">▲ 27% QoQ</div></div>
+  <div class="kpi" id="kpi-churn"><div class="l">Monthly churn</div><div class="v">3.1%</div><div class="d down">▲ 0.4 pt</div></div>
+  <div class="kpi" id="kpi-nps"><div class="l">NPS</div><div class="v">47</div><div class="d up">▲ 5</div></div>
+</div>
+
+<h2>Subscriber growth</h2>
+<p>Net new paid subscribers reached 12,300 in Q3, compared with 7,100 in Q2. Roughly 60% of new subscribers activated AI summaries within their first week, and those users converted to paid at twice the rate of everyone else.</p>
+
+<figure id="trend">
+<svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Monthly paid subscribers, January to September">
+  <g stroke="#e3e6ea"><line x1="40" y1="30" x2="710" y2="30"/><line x1="40" y1="90" x2="710" y2="90"/><line x1="40" y1="150" x2="710" y2="150"/><line x1="40" y1="190" x2="710" y2="190"/></g>
+  <g fill="#8b93a1" font-size="11" font-family="system-ui,sans-serif">
+    <text x="4" y="34">50k</text><text x="4" y="94">35k</text><text x="4" y="154">20k</text>
+    <text x="62" y="210">Jan</text><text x="136" y="210">Feb</text><text x="210" y="210">Mar</text><text x="284" y="210">Apr</text><text x="358" y="210">May</text><text x="432" y="210">Jun</text><text x="506" y="210">Jul</text><text x="580" y="210">Aug</text><text x="654" y="210">Sep</text>
+  </g>
+  <polyline fill="none" stroke="#3563e9" stroke-width="3" stroke-linejoin="round" points="72,160 146,154 220,149 294,141 368,134 442,128 516,104 590,72 664,37"/>
+  <g fill="#3563e9"><circle cx="516" cy="104" r="4"/><circle cx="590" cy="72" r="4"/><circle cx="664" cy="37" r="4"/></g>
+  <text x="560" y="58" fill="#3563e9" font-size="12" font-family="system-ui,sans-serif" font-weight="600">Student plan launch</text>
+</svg>
+<figcaption>Figure 1. Paid subscribers by month, January–September 2026</figcaption>
+</figure>
+
+<h2>Revenue by plan</h2>
+<table>
+  <tr><th>Plan</th><th>Subscribers</th><th>MRR</th><th>QoQ</th></tr>
+  <tr><td>Personal</td><td>29,400</td><td>$235k</td><td>+18%</td></tr>
+  <tr><td>Team</td><td>9,600</td><td>$148k</td><td>+22%</td></tr>
+  <tr><td>Student</td><td>9,200</td><td>$29k</td><td>new</td></tr>
+</table>
+<p>The student plan added volume but little revenue: at $3.20 per month it carries the lowest margin of any plan. Team plan growth came almost entirely from existing customers adding seats.</p>
+
+<h2>Retention</h2>
+<p>Monthly churn rose to 3.1%, mostly among students who joined during the August promotion. Churn on Personal and Team plans held steady at 2.2%. This is a seasonal effect and should resolve itself once the semester starts.</p>
+
+<h2>Recommendations</h2>
+<ul>
+  <li>Make AI summaries the default first-run experience for every new account.</li>
+  <li>Introduce annual billing for the student plan to reduce semester-end churn.</li>
+  <li>Keep the Team plan pricing unchanged through Q4.</li>
+</ul>
+<p class="callout">Next review: January 2027, covering Q4 results and the annual billing pilot.</p>
+</body>
+</html>

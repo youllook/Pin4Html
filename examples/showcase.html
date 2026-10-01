@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q3 成長回顧 — 微光筆記</title>
+<style>
+  :root{--fg:#1f2328;--mut:#5b6370;--bd:#e3e6ea;--soft:#f6f7f9;--acc:#3563e9}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI","Microsoft JhengHei","PingFang TC",sans-serif;max-width:800px;margin:48px auto 80px;padding:0 20px;color:var(--fg);line-height:1.8;font-size:16px;background:#fff}
+  .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--acc);font-weight:600;margin:0}
+  h1{font-size:30px;line-height:1.3;margin:6px 0 4px}
+  .meta{color:var(--mut);font-size:14px;margin:0 0 24px}
+  h2{font-size:20px;margin:36px 0 8px;padding-top:4px}
+  .lead{font-size:17px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0 8px}
+  .kpi{border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+  .kpi .l{font-size:12px;color:var(--mut)}
+  .kpi .v{font-size:24px;font-weight:600;line-height:1.3}
+  .kpi .d{font-size:12px;font-weight:600}
+  .up{color:#1a7f37}.down{color:#cf222e}
+  figure{margin:16px 0 4px;padding:16px 18px 10px;background:var(--soft);border-radius:12px}
+  figcaption{font-size:13px;color:var(--mut);margin-top:6px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}
+  th,td{border-bottom:1px solid var(--bd);padding:7px 10px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{font-weight:600;color:var(--mut);font-size:12px}
+  ul{padding-left:20px}li{margin:4px 0}
+  .callout{border-left:3px solid var(--acc);background:#f3f6fe;padding:10px 14px;border-radius:0 8px 8px 0;font-size:15px}
+</style>
+</head>
+<body>
+<p class="eyebrow">季度營運回顧</p>
+<h1>微光筆記 — Q3 成長回顧</h1>
+<p class="meta">成長團隊撰寫 · 2026 年 10 月 · 主管審閱草稿</p>
+
+<p class="lead">Q3 是我們歷來表現最好的一季：付費訂閱數較上季成長 34%，主要來自新推出的 AI 摘要功能，以及八月上線的學生方案。</p>
+
+<div class="kpis">
+  <div class="kpi" id="kpi-subs"><div class="l">付費訂閱數</div><div class="v">48,200</div><div class="d up">▲ 34% 季增</div></div>
+  <div class="kpi" id="kpi-mrr"><div class="l">月經常性收入</div><div class="v">$1,240 萬</div><div class="d up">▲ 27% 季增</div></div>
+  <div class="kpi" id="kpi-churn"><div class="l">月流失率</div><div class="v">3.1%</div><div class="d down">▲ 0.4 個百分點</div></div>
+  <div class="kpi" id="kpi-nps"><div class="l">NPS</div><div class="v">47</div><div class="d up">▲ 5</div></div>
+</div>
+
+<h2>訂閱成長</h2>
+<p>Q3 淨增付費訂閱 12,300 人，Q2 為 7,100 人。約六成新訂閱者在第一週內啟用了 AI 摘要，這群使用者轉為付費的比例是其他人的兩倍。</p>
+
+<figure id="trend">
+<svg viewBox="0 0 720 220" width="100%" role="img" aria-label="一至九月每月付費訂閱數">
+  <g stroke="#e3e6ea"><line x1="40" y1="30" x2="710" y2="30"/><line x1="40" y1="90" x2="710" y2="90"/><line x1="40" y1="150" x2="710" y2="150"/><line x1="40" y1="190" x2="710" y2="190"/></g>
+  <g fill="#8b93a1" font-size="11" font-family="system-ui,sans-serif">
+    <text x="4" y="34">5 萬</text><text x="4" y="94">3.5 萬</text><text x="4" y="154">2 萬</text>
+    <text x="62" y="210">1 月</text><text x="136" y="210">2 月</text><text x="210" y="210">3 月</text><text x="284" y="210">4 月</text><text x="358" y="210">5 月</text><text x="432" y="210">6 月</text><text x="506" y="210">7 月</text><text x="580" y="210">8 月</text><text x="654" y="210">9 月</text>
+  </g>
+  <polyline fill="none" stroke="#3563e9" stroke-width="3" stroke-linejoin="round" points="72,160 146,154 220,149 294,141 368,134 442,128 516,104 590,72 664,37"/>
+  <g fill="#3563e9"><circle cx="516" cy="104" r="4"/><circle cx="590" cy="72" r="4"/><circle cx="664" cy="37" r="4"/></g>
+  <text x="580" y="58" fill="#3563e9" font-size="12" font-family="system-ui,sans-serif" font-weight="600">學生方案上線</text>
+</svg>
+<figcaption>圖 1　2026 年 1–9 月每月付費訂閱數</figcaption>
+</figure>
+
+<h2>各方案營收</h2>
+<table>
+  <tr><th>方案</th><th>訂閱數</th><th>月收入</th><th>季增</th></tr>
+  <tr><td>個人版</td><td>29,400</td><td>$705 萬</td><td>+18%</td></tr>
+  <tr><td>團隊版</td><td>9,600</td><td>$444 萬</td><td>+22%</td></tr>
+  <tr><td>學生版</td><td>9,200</td><td>$91 萬</td><td>新方案</td></tr>
+</table>
+<p>學生方案帶來用戶量，但營收貢獻有限：每月 99 元的定價是所有方案中毛利最低的。團隊版的成長幾乎都來自既有客戶加購席次。</p>
+
+<h2>留存</h2>
+<p>月流失率上升至 3.1%，主要集中在八月促銷期間加入的學生用戶。個人版與團隊版的流失率維持在 2.2%。這是季節性現象，開學後應會自然回穩。</p>
+
+<h2>建議</h2>
+<ul>
+  <li>將 AI 摘要設為所有新帳號的預設首次體驗。</li>
+  <li>學生方案推出年繳選項，降低學期末流失。</li>
+  <li>團隊版定價在 Q4 維持不變。</li>
+</ul>
+<p class="callout">下次回顧：2027 年 1 月，涵蓋 Q4 成果與年繳試行結果。</p>
+</body>
+</html>
