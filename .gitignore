@@ -1,0 +1,5 @@
+*.pins.json
+!examples/demo.pins.json
+*.pins.json.tmp
+*.review.html
+__pycache__/
