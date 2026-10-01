@@ -34,8 +34,8 @@ CDN = 'https://cdn.jsdelivr.net/gh/youllook/Pin4Html@1/pin4html.js'
 START, END = '<!-- pin4html:start -->', '<!-- pin4html:end -->'
 BLOCK_RE = re.compile(re.escape(START) + r'.*?' + re.escape(END) + r'\s*', re.S)
 TYPES = {
-    'comment': '💬 comment', 'rewrite': '✏️ rewrite', 'delete': '✂️ delete', 'add': '➕ add',
-    'verify': '🔍 verify', 'question': '❓ question', 'style': '🎨 layout', 'keep': '👍 keep',
+    'comment': 'comment', 'rewrite': 'rewrite', 'delete': 'delete', 'add': 'add',
+    'verify': 'verify', 'question': 'question', 'style': 'layout', 'keep': 'keep',
 }
 
 
@@ -249,7 +249,7 @@ def cmd_show(a):
     for x in items:
         t = TYPES.get(x.get('type'), x.get('type'))
         flag = ' [MUST-FIX]' if x.get('priority') == 'must' else ''
-        done = ' ✅' if x.get('resolved') else ''
+        done = ' [resolved]' if x.get('resolved') else ''
         print(f'\n## #{x.get("n", "?")} {t}{flag}{done}  id={x["id"]}  § {x.get("heading") or "(top)"}')
         if x.get('kind') == 'text':
             print(f'  quote: "{x.get("quote", "")}"')
@@ -278,7 +278,7 @@ def cmd_reply(a):
         for key, val in replies.items():
             ann = next((x for x in anns if x['id'] == key or str(x.get('n')) == str(key).lstrip('#')), None)
             if not ann:
-                print(f'⚠️ Pin not found: {key}')
+                print(f'Warning: pin not found: {key}')
                 continue
             if isinstance(val, str):
                 val = {'reply': val}

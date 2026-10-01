@@ -37,38 +37,38 @@
       local: '僅存在此瀏覽器（用「複製給 AI」或匯出 JSON 交回）', connecting: '連線中…', saving: '儲存中…',
       synced: '已自動同步到檔案，AI 可直接讀取', offline: '伺服器離線，改動暫存在頁面，恢復後自動補存',
     },
-    lsFail: '⚠️ 無法寫入 localStorage，請記得匯出 JSON',
-    gotReply: '🤖 收到 AI 回覆', pinsUpdated: '🔄 標記已更新', htmlChanged: '📄 報告內容已修改', reloadNew: '重新載入看新版',
+    lsFail: '無法寫入 localStorage，請記得匯出 JSON',
+    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告內容已修改', reloadNew: '重新載入看新版',
     clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
-    fabTitle: '審閱標記（Alt+R）', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
-    drawTip: '🔲 拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
+    fabTitle: '審閱標記（Alt+R）', fabLabel: '標記', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
+    drawTip: '拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
     headText: (q) => '標記選取：「' + q + '」', headRegion: (t) => '標記框選區域（' + t + ' 內）',
     headPin: (t) => '在此處釘一個標記（虛線框＝會附著的元素 ' + t + '）',
     toRegion: '改成框選區域…', openList: '開啟標記清單',
     edit: '編輯…', changeTo: (l) => '改成「' + l + '」', unmust: '取消必改', setMust: '標為必改',
     reopen: '重新開啟', setResolved: '標為已解決', reanchorRange: '重新框選範圍', delAnn: '刪除標記',
-    quickAdded: (i, l, n) => i + ' 已新增「' + l + '」#' + n + '（點標記可補說明）', addNote: '補說明',
-    deleted: (n) => '🗑️ 已刪除標記 #' + n, undo: '復原',
+    quickAdded: (l, n) => '已新增「' + l + '」#' + n + '（點標記可補說明）', addNote: '補說明',
+    deleted: (n) => '已刪除標記 #' + n, undo: '復原',
     notePh: (hint) => hint + '…（Ctrl+Enter 儲存，Esc 取消）',
-    orphanLong: '⚠️ 頁面上找不到原文（內容可能已被修改），可用「重新框選」重新定位',
-    note: '說明', aiReply: '🤖 AI 回覆：', must: '必改', resolved: '已解決',
-    del: '刪除', reanchorBtn: '🎯 重新框選', reanchorTitle: '選取新的文字範圍來重新定位', cancel: '取消', save: '儲存',
-    added: (i, n) => i + ' 已新增 #' + n, reanchorTip: (n) => '🎯 請選取新的文字範圍來定位 #' + n + '（Esc 取消）',
-    sideTitle: '📝 審閱標記', stats: (o, m, d) => '未解決 ' + o + ' 則（必改 ' + m + '）・已解決 ' + d + ' 則',
+    orphanLong: '頁面上找不到原文（內容可能已被修改），可用「重新框選」重新定位',
+    note: '說明', aiReply: 'AI 回覆：', must: '必改', resolved: '已解決',
+    del: '刪除', reanchorBtn: '重新框選', reanchorTitle: '選取新的文字範圍來重新定位', cancel: '取消', save: '儲存',
+    added: (n) => '已新增 #' + n, reanchorTip: (n) => '請選取新的文字範圍來定位 #' + n + '（Esc 取消）',
+    sideTitle: '審閱標記', stats: (o, m, d) => '未解決 ' + o + ' 則（必改 ' + m + '）・已解決 ' + d + ' 則',
     all: '全部', showResolved: '顯示已解決', hideMarks: '隱藏頁面標記',
     empty: ['還沒有標記', '選取文字後按右鍵，或直接在任意位置按右鍵', 'Shift+右鍵 = 原生選單'],
     detail: '輸出詳細度', levels: { brief: '精簡', std: '標準', full: '詳細' },
     levelTips: { brief: '一則一行，省 token', std: '原文＋位置＋說明', full: '再加上下文、選擇器、時間（定位最穩）' },
-    copy: '📋 複製給 AI', copyTitle: '複製 Markdown 審閱意見，貼到 AI 對話即可', jsonTitle: '下載 JSON（AI 可直接讀檔）',
-    importBtn: '⬆️ 匯入', clear: '清空', clearConfirm: (n) => '確定清空全部 ' + n + ' 則標記？（建議先匯出 JSON）',
-    orphanShort: '⚠️ 找不到原文', regionIn: '🔲 區域 in <',
-    copied: (n) => '📋 已複製 ' + n + ' 則意見，貼到 AI 對話即可', imported: (n) => '⬆️ 已匯入 ' + n + ' 則', importFail: '⚠️ 匯入失敗：',
-    welcome: '📝 審閱模式：選取文字或直接按右鍵新增標記（Alt+R 開清單）',
+    copy: '複製給 AI', copyTitle: '複製 Markdown 審閱意見，貼到 AI 對話即可', jsonTitle: '下載 JSON（AI 可直接讀檔）',
+    importBtn: '匯入', clear: '清空', clearConfirm: (n) => '確定清空全部 ' + n + ' 則標記？（建議先匯出 JSON）',
+    orphanShort: '找不到原文', regionIn: '區域 in <',
+    copied: (n) => '已複製 ' + n + ' 則意見，貼到 AI 對話即可', imported: (n) => '已匯入 ' + n + ' 則', importFail: '匯入失敗：',
+    welcome: '審閱模式：選取文字或直接按右鍵新增標記（Alt+R 開清單）',
     langBtn: 'EN', langTitle: 'Switch to English',
     md: {
       title: '# 審閱意見：', count: (n) => '（' + n + ' 則）', region: '區域', point: '位置', top: '開頭',
       file: '- 檔案：', exported: '- 匯出：', summary: (o, m, d) => '- 未解決 ' + o + ' 則（必改 ' + m + '）；已解決 ' + d + ' 則',
-      mustTag: '【必改】', orphan: '（⚠️ 頁面上已找不到原文）', loc: '- 位置：', beforeFirst: '（第一個標題之前）',
+      mustTag: '【必改】', orphan: '（頁面上已找不到原文）', loc: '- 位置：', beforeFirst: '（第一個標題之前）',
       quote: '- 原文：', context: '- 上下文：', selector: '- 選擇器：', content: '內容', note: '- 說明：', reply: '- AI 回覆：',
       regionLine: (t, s, x, y, w, h) => '- 框選區域：`<' + t + '>`「' + s + '」內，左 ' + x + '、上 ' + y + '、寬 ' + w + '、高 ' + h,
       pinLine: (t, s) => '- 標記點：`<' + t + '>`「' + s + '」',
@@ -86,38 +86,38 @@
       local: 'Stored in this browser only (use "Copy for AI" or export JSON)', connecting: 'Connecting…', saving: 'Saving…',
       synced: 'Auto-saved to file — your AI can read it', offline: 'Server offline — changes kept here, will retry',
     },
-    lsFail: '⚠️ Cannot write to localStorage — remember to export JSON',
-    gotReply: '🤖 AI replied', pinsUpdated: '🔄 Pins updated', htmlChanged: '📄 Report changed', reloadNew: 'Reload',
+    lsFail: 'Cannot write to localStorage — remember to export JSON',
+    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report changed', reloadNew: 'Reload',
     clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
-    fabTitle: 'Annotations (Alt+R)', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
-    drawTip: '🔲 Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
+    fabTitle: 'Annotations (Alt+R)', fabLabel: 'Notes', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
+    drawTip: 'Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
     headText: (q) => 'Annotate selection: "' + q + '"', headRegion: (t) => 'Annotate boxed area (inside ' + t + ')',
     headPin: (t) => 'Drop a pin here (dashed box = attached element ' + t + ')',
     toRegion: 'Box an area instead…', openList: 'Open annotation list',
     edit: 'Edit…', changeTo: (l) => 'Change to "' + l + '"', unmust: 'Unmark must-fix', setMust: 'Mark as must-fix',
     reopen: 'Reopen', setResolved: 'Mark resolved', reanchorRange: 'Re-select range', delAnn: 'Delete annotation',
-    quickAdded: (i, l, n) => i + ' Added "' + l + '" #' + n + ' (click it to add a note)', addNote: 'Add note',
-    deleted: (n) => '🗑️ Deleted #' + n, undo: 'Undo',
+    quickAdded: (l, n) => 'Added "' + l + '" #' + n + ' (click it to add a note)', addNote: 'Add note',
+    deleted: (n) => 'Deleted #' + n, undo: 'Undo',
     notePh: (hint) => hint + '… (Ctrl+Enter to save, Esc to cancel)',
-    orphanLong: '⚠️ Original text not found on the page (it may have changed). Use "Re-select" to re-anchor.',
-    note: 'Note', aiReply: '🤖 AI reply: ', must: 'Must-fix', resolved: 'Resolved',
-    del: 'Delete', reanchorBtn: '🎯 Re-select', reanchorTitle: 'Select new text to re-anchor', cancel: 'Cancel', save: 'Save',
-    added: (i, n) => i + ' Added #' + n, reanchorTip: (n) => '🎯 Select new text to re-anchor #' + n + ' (Esc to cancel)',
-    sideTitle: '📝 Annotations', stats: (o, m, d) => o + ' open (' + m + ' must-fix) · ' + d + ' resolved',
+    orphanLong: 'Original text not found on the page (it may have changed). Use "Re-select" to re-anchor.',
+    note: 'Note', aiReply: 'AI reply: ', must: 'Must-fix', resolved: 'Resolved',
+    del: 'Delete', reanchorBtn: 'Re-select', reanchorTitle: 'Select new text to re-anchor', cancel: 'Cancel', save: 'Save',
+    added: (n) => 'Added #' + n, reanchorTip: (n) => 'Select new text to re-anchor #' + n + ' (Esc to cancel)',
+    sideTitle: 'Annotations', stats: (o, m, d) => o + ' open (' + m + ' must-fix) · ' + d + ' resolved',
     all: 'All', showResolved: 'Show resolved', hideMarks: 'Hide on page',
     empty: ['No annotations yet', 'Select text and right-click, or right-click anywhere', 'Shift+right-click = browser menu'],
     detail: 'Export detail', levels: { brief: 'Brief', std: 'Standard', full: 'Full' },
     levelTips: { brief: 'One line each — fewer tokens', std: 'Quote + location + note', full: 'Adds context, selector, timestamps (most robust)' },
-    copy: '📋 Copy for AI', copyTitle: 'Copy review notes as Markdown and paste into your AI chat', jsonTitle: 'Download JSON (your AI can read the file)',
-    importBtn: '⬆️ Import', clear: 'Clear', clearConfirm: (n) => 'Delete all ' + n + ' annotations? (Export JSON first if unsure)',
-    orphanShort: '⚠️ Text not found', regionIn: '🔲 Area in <',
-    copied: (n) => '📋 Copied ' + n + ' notes — paste them into your AI chat', imported: (n) => '⬆️ Imported ' + n, importFail: '⚠️ Import failed: ',
-    welcome: '📝 Review mode: select text or right-click anywhere to annotate (Alt+R for the list)',
+    copy: 'Copy for AI', copyTitle: 'Copy review notes as Markdown and paste into your AI chat', jsonTitle: 'Download JSON (your AI can read the file)',
+    importBtn: 'Import', clear: 'Clear', clearConfirm: (n) => 'Delete all ' + n + ' annotations? (Export JSON first if unsure)',
+    orphanShort: 'Text not found', regionIn: 'Area in <',
+    copied: (n) => 'Copied ' + n + ' notes — paste them into your AI chat', imported: (n) => 'Imported ' + n, importFail: 'Import failed: ',
+    welcome: 'Review mode: select text or right-click anywhere to annotate (Alt+R for the list)',
     langBtn: '中', langTitle: '切換成中文',
     md: {
       title: '# Review notes: ', count: (n) => ' (' + n + ')', region: 'area', point: 'pin', top: 'top',
       file: '- File: ', exported: '- Exported: ', summary: (o, m, d) => '- ' + o + ' open (' + m + ' must-fix); ' + d + ' resolved',
-      mustTag: ' [MUST-FIX]', orphan: ' (⚠️ original text no longer found)', loc: '- Location: ', beforeFirst: '(before the first heading)',
+      mustTag: ' [MUST-FIX]', orphan: ' (original text no longer found)', loc: '- Location: ', beforeFirst: '(before the first heading)',
       quote: '- Quote: ', context: '- Context: ', selector: '- Selector: ', content: 'Content', note: '- Note: ', reply: '- AI reply: ',
       regionLine: (t, s, x, y, w, h) => '- Area: inside `<' + t + '>` "' + s + '", left ' + x + ', top ' + y + ', width ' + w + ', height ' + h,
       pinLine: (t, s) => '- Pin: `<' + t + '>` "' + s + '"',
@@ -133,14 +133,15 @@
   }
 
   const TYPES = {
-    comment:  { icon: '💬', color: '#3b82f6' },
-    rewrite:  { icon: '✏️', color: '#f59e0b' },
-    delete:   { icon: '✂️', color: '#ef4444', quick: true },
-    add:      { icon: '➕', color: '#10b981' },
-    verify:   { icon: '🔍', color: '#8b5cf6' },
-    question: { icon: '❓', color: '#0ea5e9' },
-    style:    { icon: '🎨', color: '#ec4899' },
-    keep:     { icon: '👍', color: '#22c55e', quick: true },
+    // 5 組語意色：留言/疑問=藍、改寫/補充/版面=琥珀、刪除=紅、查證=紫、保留=綠
+    comment:  { color: '#2f7bcb' },
+    rewrite:  { color: '#b7701a' },
+    delete:   { color: '#d03b3a', quick: true },
+    add:      { color: '#b7701a' },
+    verify:   { color: '#6a5fd0' },
+    question: { color: '#2f7bcb' },
+    style:    { color: '#b7701a' },
+    keep:     { color: '#4f8a1b', quick: true },
   };
   for (const k in TYPES) { const [label, hint, field] = T.types[k]; Object.assign(TYPES[k], { label, hint, field }); }
   const ORDER = Object.keys(TYPES);
@@ -185,11 +186,10 @@
   // ---------- 伺服器同步 ----------
   // 樂觀鎖：POST 帶 baseRev，檔案被別人（例如 AI 寫回覆）改過會回 409，逐則合併後重送
   let sync = SERVER ? 'connecting' : 'local', dirty = false, inflight = false, syncTimer = 0, htmlStamp = null;
-  const SYNC_ICON = { local: '⚪', connecting: '🟡', saving: '🟡', synced: '🟢', offline: '🔴' };
-  const SYNC_LABEL = {};
-  for (const k in SYNC_ICON) SYNC_LABEL[k] = [SYNC_ICON[k], T.sync[k]];
+  const SYNC_COLOR = { local: '#9ca3af', connecting: '#d97706', saving: '#d97706', synced: '#16a34a', offline: '#dc2626' };
+  const syncDot = () => h('span', { class: 'dot', style: '--c:' + SYNC_COLOR[sync] });
   const pinsUrl = () => SERVER + 'pins?file=' + encodeURIComponent(FILE);
-  function setSync(s) { sync = s; renderFab(); const el = ui.querySelector('.sync'); if (el) el.textContent = SYNC_LABEL[s].join(' '); }
+  function setSync(s) { sync = s; renderFab(); const el = ui.querySelector('.sync'); if (el) el.replaceChildren(syncDot(), T.sync[s]); }
   function stamp(r) {
     const m = r.headers.get('X-Pin4html-Html-Mtime');
     if (!m) return;
@@ -401,15 +401,15 @@
   *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI","Microsoft JhengHei","PingFang TC",sans-serif}
   .ui,.pins{--bg:#fff;--fg:#1f2328;--mut:#6b7280;--bd:#e5e7eb;--hov:#f3f4f6;--acc:#2563eb;color:var(--fg);font-size:13px;line-height:1.45}
   @media (prefers-color-scheme:dark){.ui,.pins{--bg:#1f2329;--fg:#e6e8eb;--mut:#9aa1ab;--bd:#3a414b;--hov:#2a3038;--acc:#60a5fa}}
-  .pin{position:absolute;min-width:22px;height:22px;margin-top:-22px;padding:0 5px;border-radius:11px 11px 11px 2px;background:var(--c);color:#fff;
-    font:600 11px/22px system-ui;text-align:center;cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.3);user-select:none;touch-action:none;white-space:nowrap}
-  .pin.res{opacity:.45}.pin.must{outline:2px solid #dc2626;outline-offset:1px}.pin.drag{cursor:grabbing;opacity:.8}
+  .pin{position:absolute;min-width:18px;height:18px;margin-top:-18px;padding:0 5px;border-radius:9px 9px 9px 2px;background:var(--c);color:#fff;
+    font:600 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;cursor:grab;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.2);user-select:none;touch-action:none;white-space:nowrap}
+  .pin.res{opacity:.45}.pin.must{background:#d03b3a;box-shadow:0 0 0 1.5px #fff,0 0 0 3px #d03b3a}.pin.drag{cursor:grabbing;opacity:.8}
   .pin.flash,.region.flash{animation:fl .5s 3}
-  .region{position:absolute;border:2px dashed var(--c);background:color-mix(in srgb,var(--c) 8%,transparent);border-radius:6px;pointer-events:none}
-  .region.res{opacity:.4}.region.must{border-style:solid}
-  .region .rl{position:absolute;left:-2px;top:-22px;height:20px;padding:0 6px;border-radius:6px 6px 6px 0;background:var(--c);color:#fff;
-    font:600 11px/20px system-ui;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 2px 6px rgba(0,0,0,.25)}
-  .target{position:absolute;outline:2px dashed var(--acc);outline-offset:2px;border-radius:4px;background:color-mix(in srgb,var(--acc) 7%,transparent);pointer-events:none}
+  .region{position:absolute;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 5%,transparent);border-radius:2px;pointer-events:none}
+  .region.res{opacity:.45;border-style:dashed}.region.must{border-width:2px}.region.must .rl{background:#d03b3a}
+  .region .rl{position:absolute;left:-1px;top:-18px;height:18px;padding:0 5px;border-radius:2px 2px 2px 0;background:var(--c);color:#fff;
+    font:600 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap;cursor:pointer;pointer-events:auto}
+  .target{position:absolute;outline:1px dashed var(--acc);outline-offset:2px;border-radius:2px;background:color-mix(in srgb,var(--acc) 5%,transparent);pointer-events:none}
   .drawov{position:fixed;inset:0;cursor:crosshair;background:rgba(0,0,0,.06);z-index:5}
   .drawov .box{position:absolute;border:2px dashed var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);border-radius:6px}
   .drawov .tip{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px}
@@ -422,11 +422,10 @@
   .item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer}
   .item:hover{background:var(--hov)}
   .item .k{margin-left:auto;color:var(--mut);font-size:11px;padding-left:12px}
-  .item .ic{width:18px;text-align:center}
+  .item .ic{width:14px;display:flex;justify-content:center}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex:none;vertical-align:middle}.chip .dot,.sync .dot{margin-right:6px}.fab .dot{margin-right:8px}
   .sep{height:1px;background:var(--bd);margin:4px 2px}
-  .row{display:flex;gap:4px;padding:2px 4px;flex-wrap:wrap}
-  .ib{border:1px solid transparent;background:none;border-radius:6px;padding:3px 5px;cursor:pointer;font-size:15px}
-  .ib:hover{background:var(--hov);border-color:var(--bd)}
+  .row{display:flex;gap:4px;padding:4px 6px;flex-wrap:wrap;max-width:300px}
   .ed{width:380px;max-width:calc(100vw - 16px);padding:12px;display:flex;flex-direction:column;gap:8px}
   .chips{display:flex;flex-wrap:wrap;gap:4px}
   .chip{border:1px solid var(--bd);border-radius:999px;padding:2px 8px;cursor:pointer;background:transparent;color:var(--fg);font-size:12px}
@@ -442,9 +441,9 @@
   .btn:hover{background:var(--hov)}
   .btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
   .btn.dan{color:#dc2626}
-  .fab{position:fixed;right:18px;bottom:18px;height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);
-    box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer;font-size:14px;font-weight:600;z-index:1}
-  .fab .m{color:#dc2626;margin-left:4px}
+  .fab{position:fixed;right:18px;bottom:18px;height:36px;padding:0 14px;border-radius:18px;display:flex;align-items:center;border:1px solid var(--bd);background:var(--bg);color:var(--fg);
+    box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer;font-size:13px;font-weight:500;z-index:1}
+  .fab .m{margin-left:8px;background:#d03b3a;color:#fff;border-radius:9px;padding:1px 6px;font-size:11px}
   .side{position:fixed;top:0;right:0;width:370px;max-width:100vw;height:100vh;display:flex;flex-direction:column;background:var(--bg);border-left:1px solid var(--bd);box-shadow:-8px 0 24px rgba(0,0,0,.15);z-index:2}
   .sh{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
   .st{display:flex;align-items:center;font-weight:700;font-size:15px}.st .x{margin-left:auto}
@@ -453,8 +452,8 @@
   .card{border:1px solid var(--bd);border-left:4px solid var(--c);border-radius:8px;padding:8px 10px;margin-bottom:8px;cursor:pointer}
   .card:hover{background:var(--hov)}.card.res{opacity:.5}
   .ct{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600}
-  .ct .n{background:var(--c);color:#fff;border-radius:8px;padding:0 6px;font-size:11px}
-  .ct .must{color:#dc2626}.ct .orph{color:#d97706;font-weight:400}
+  .ct .n{color:var(--c);font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.ct .n::before{content:"#"}
+  .ct .must{color:#fff;background:#d03b3a;border-radius:3px;padding:0 5px;font-size:11px}.ct .done{color:#16a34a;font-weight:400}.ct .orph{color:#d97706;font-weight:400}
   .ct .loc{margin-left:auto;color:var(--mut);font-weight:400;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cq{color:var(--mut);font-size:12px;margin-top:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .cn{font-size:13px;margin-top:4px;white-space:pre-wrap}
@@ -466,20 +465,23 @@
   @media print{.ui,.pins{display:none}}
   `;
   function docCss() {
-    let css = `mark.p4h-hl{background:transparent;color:inherit;padding:0;border-radius:2px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-    mark.p4h-hl[data-n]::after{content:attr(data-n);display:inline-block;min-width:16px;height:16px;padding:0 4px;margin-left:2px;border-radius:8px;
-      background:var(--p4h-c);color:#fff;font:600 10px/16px system-ui,sans-serif;text-align:center;vertical-align:super;text-indent:0;letter-spacing:0;text-decoration:none}
-    mark.p4h-hl.p4h-must[data-n]::after{box-shadow:0 0 0 2px #dc2626}
-    mark.p4h-hl.p4h-resolved{background:transparent!important;border-bottom-style:dashed!important;text-decoration:none!important}
+    // C 極簡線條風：不填底色，細底線＋上標 [n]；必改＝實心紅編號；已解決＝虛線
+    let css = `mark.p4h-hl{background:transparent;color:inherit;padding:0 0 1px;border-radius:0;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-color .15s}
+    mark.p4h-hl:hover{background:color-mix(in srgb,var(--p4h-c) 12%,transparent)}
+    mark.p4h-hl[data-n]::after{content:'[' attr(data-n) ']';display:inline-block;margin-left:1px;color:var(--p4h-c);
+      font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;vertical-align:super;text-indent:0;letter-spacing:0;text-decoration:none}
+    mark.p4h-hl.p4h-must{border-bottom-width:2px!important}
+    mark.p4h-hl.p4h-must[data-n]::after{content:attr(data-n);margin-left:2px;padding:2px 4px;border-radius:3px;background:#d03b3a;color:#fff}
+    mark.p4h-hl.p4h-resolved{border-bottom-style:dashed!important;text-decoration:none!important}
     mark.p4h-hl.p4h-resolved[data-n]::after{opacity:.45}
     mark.p4h-hl.p4h-flash{animation:p4h-fl .5s 3}
-    @keyframes p4h-fl{50%{background:var(--p4h-c);color:#fff}}
+    @keyframes p4h-fl{50%{background:color-mix(in srgb,var(--p4h-c) 30%,transparent)}}
     @media print{mark.p4h-hl{background:none!important;border:0!important;text-decoration:none!important}mark.p4h-hl::after{display:none!important}}`;
     for (const k of ORDER) {
       const c = TYPES[k].color;
-      css += `\nmark.p4h-hl.p4h-t-${k}{--p4h-c:${c};background:${c}2e;border-bottom:2px solid ${c}}`;
+      css += `\nmark.p4h-hl.p4h-t-${k}{--p4h-c:${c};border-bottom:1.5px solid ${c}}`;
     }
-    css += `\nmark.p4h-hl.p4h-t-delete{text-decoration:line-through;text-decoration-color:#ef4444;text-decoration-thickness:2px}`;
+    css += `\nmark.p4h-hl.p4h-t-delete{text-decoration:line-through;text-decoration-color:${TYPES.delete.color};text-decoration-thickness:1.5px}`;
     return css;
   }
 
@@ -543,7 +545,7 @@
       if (a.kind === 'text' || a._orphan || !visible(a)) continue;
       const t = TYPES[a.type] || TYPES.comment;
       if (a.kind === 'region') {
-        const lab = h('div', { class: 'rl', text: t.icon + ' ' + a._n, title: t.label + (a.note ? T.colon + a.note : '') });
+        const lab = h('div', { class: 'rl', text: String(a._n), title: t.label + (a.note ? T.colon + a.note : '') });
         lab.dataset.p4h = a.id;
         lab.addEventListener('click', (e) => openEditor(a, e.clientX, e.clientY));
         const box = h('div', { class: 'region' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''), style: '--c:' + t.color }, lab);
@@ -554,7 +556,7 @@
       const p = h('div', {
         class: 'pin' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''),
         style: '--c:' + t.color, title: (t.label + (a.note ? T.colon + a.note : '')) + '\n' + T.dragHint,
-        text: t.icon + ' ' + a._n,
+        text: String(a._n),
       });
       p.dataset.p4h = a.id;
       bindPinDrag(p, a);
@@ -581,10 +583,10 @@
   function renderFab() {
     const open = state.annotations.filter((a) => !a.resolved);
     const must = open.filter((a) => a.priority === 'must').length;
-    fab.textContent = '📝 ' + open.length;
-    fab.title = T.fabTitle + '\n' + SYNC_LABEL[sync].join(' ');
-    if (sync !== 'local') fab.prepend(h('span', { style: 'margin-right:6px;font-size:10px;vertical-align:middle', text: SYNC_LABEL[sync][0] }));
-    if (must) fab.appendChild(h('span', { class: 'm', text: '●' + must }));
+    fab.textContent = T.fabLabel + ' ' + open.length;
+    fab.title = T.fabTitle + '\n' + T.sync[sync];
+    if (sync !== 'local') fab.prepend(syncDot());
+    if (must) fab.appendChild(h('span', { class: 'm', text: must }));
     if (hidden) fab.appendChild(h('span', { style: 'margin-left:6px;opacity:.6', text: T.hiddenTag }));
   }
 
@@ -700,14 +702,14 @@
       ORDER.map((k, i) => {
         const t = TYPES[k];
         return h('div', { class: 'item', onclick: () => create(k, anchor, x, y) },
-          h('span', { class: 'ic', text: t.icon }), h('span', { text: t.label }),
+          h('span', { class: 'ic' }, h('span', { class: 'dot', style: '--c:' + t.color })), h('span', { text: t.label }),
           h('span', { class: 'k', text: t.hint + ' · ' + (i + 1) }));
       }),
       h('div', { class: 'sep' }),
       anchor.kind === 'region' ? null : h('div', { class: 'item', onclick: startDraw },
-        h('span', { class: 'ic', text: '🔲' }), h('span', { text: T.toRegion }), h('span', { class: 'k', text: 'Alt+D' })),
+        h('span', { class: 'ic' }), h('span', { text: T.toRegion }), h('span', { class: 'k', text: 'Alt+D' })),
       h('div', { class: 'item', onclick: () => { closeMenu(); toggleSide(true); } },
-        h('span', { class: 'ic', text: '📋' }), h('span', { text: T.openList }), h('span', { class: 'k', text: 'Alt+R' })));
+        h('span', { class: 'ic' }), h('span', { text: T.openList }), h('span', { class: 'k', text: 'Alt+R' })));
     menuEl._keys = (e) => { const i = +e.key - 1; if (i >= 0 && i < ORDER.length) { create(ORDER[i], anchor, x, y); return true; } };
     place(menuEl, x, y);
     showTarget(anchor);
@@ -715,21 +717,21 @@
   function openExistingMenu(x, y, a) {
     closeMenu(); closeEditor();
     const t = TYPES[a.type] || TYPES.comment;
-    const item = (ic, label, fn, cls) => h('div', { class: 'item' + (cls ? ' ' + cls : ''), onclick: () => { closeMenu(); fn(); } },
-      h('span', { class: 'ic', text: ic }), h('span', { text: label }));
+    const item = (label, fn, cls) => h('div', { class: 'item' + (cls ? ' ' + cls : ''), onclick: () => { closeMenu(); fn(); } },
+      h('span', { text: label }));
     menuEl = h('div', { class: 'pop menu' },
-      h('div', { class: 'hd', text: '#' + a._n + ' ' + t.icon + ' ' + t.label + (a.note ? T.colon + a.note : '') }),
-      item('📝', T.edit, () => openEditor(a, x, y)),
-      h('div', { class: 'row' }, ORDER.map((k) => h('button', {
-        class: 'ib', title: T.changeTo(TYPES[k].label), text: TYPES[k].icon,
+      h('div', { class: 'hd', text: '#' + a._n + ' ' + t.label + (a.note ? T.colon + a.note : '') }),
+      item(T.edit, () => openEditor(a, x, y)),
+      h('div', { class: 'row chips' }, ORDER.map((k) => h('button', {
+        class: 'chip' + (k === a.type ? ' on' : ''), title: T.changeTo(TYPES[k].label), style: '--c:' + TYPES[k].color,
         onclick: () => { closeMenu(); a.type = k; touch(a); },
-      }))),
+      }, h('span', { class: 'dot' }), TYPES[k].label))),
       h('div', { class: 'sep' }),
-      item(a.priority === 'must' ? '⚪' : '🔴', a.priority === 'must' ? T.unmust : T.setMust, () => { a.priority = a.priority === 'must' ? 'should' : 'must'; touch(a); }),
-      item(a.resolved ? '↩️' : '✅', a.resolved ? T.reopen : T.setResolved, () => { a.resolved = !a.resolved; touch(a); }),
-      item('🎯', T.reanchorRange, () => startReanchor(a)),
+      item(a.priority === 'must' ? T.unmust : T.setMust, () => { a.priority = a.priority === 'must' ? 'should' : 'must'; touch(a); }),
+      item(a.resolved ? T.reopen : T.setResolved, () => { a.resolved = !a.resolved; touch(a); }),
+      item(T.reanchorRange, () => startReanchor(a)),
       h('div', { class: 'sep' }),
-      item('🗑️', T.delAnn, () => remove(a), 'dan'));
+      item(T.delAnn, () => remove(a), 'dan'));
     place(menuEl, x, y);
   }
   function touch(a) { a.updated = Date.now(); render(); save(); }
@@ -740,7 +742,7 @@
     window.getSelection().removeAllRanges();
     if (TYPES[type].quick) {
       state.annotations.push(a); render(); save();
-      toast(T.quickAdded(TYPES[type].icon, TYPES[type].label, a._n), T.addNote, () => openEditor(a, x, y));
+      toast(T.quickAdded(TYPES[type].label, a._n), T.addNote, () => openEditor(a, x, y));
     } else openEditor(a, x, y, true);
   }
   function remove(a) {
@@ -771,19 +773,19 @@
       }
       ed.append(...[
         h('div', { class: 'chips' }, ORDER.map((k) => h('button', {
-          class: 'chip' + (k === draft.type ? ' on' : ''), style: '--c:' + TYPES[k].color, text: TYPES[k].icon + ' ' + TYPES[k].label,
+          class: 'chip' + (k === draft.type ? ' on' : ''), style: '--c:' + TYPES[k].color,
           onclick: () => { draft.type = k; draw(); },
-        }))),
+        }, h('span', { class: 'dot' }), TYPES[k].label))),
         a.kind === 'text'
           ? h('div', { class: 'quote', text: a.quote })
-          : h('div', { class: 'quote', text: (a.kind === 'region' ? '🔲 ' : '📍 ') + (a.heading ? '§ ' + a.heading + ' — ' : '') + '<' + a.tag + '> ' + (a.snippet || '') }),
+          : h('div', { class: 'quote', text: (a.heading ? '§ ' + a.heading + ' — ' : '') + '<' + a.tag + '> ' + (a.snippet || '') }),
         a._orphan ? h('div', { class: 'lbl', style: 'color:#d97706', text: T.orphanLong }) : null,
         rep ? h('div', { class: 'lbl', text: t.field }) : null, rep,
         h('div', { class: 'lbl', text: T.note }), note,
         a.reply ? h('div', { class: 'reply', text: T.aiReply + a.reply }) : null,
         h('div', { class: 'flags' },
-          h('label', null, h('input', { type: 'checkbox', checked: draft.priority === 'must', onchange: (e) => (draft.priority = e.target.checked ? 'must' : 'should') }), '🔴 ' + T.must),
-          h('label', null, h('input', { type: 'checkbox', checked: draft.resolved, onchange: (e) => (draft.resolved = e.target.checked) }), '✅ ' + T.resolved)),
+          h('label', null, h('input', { type: 'checkbox', checked: draft.priority === 'must', onchange: (e) => (draft.priority = e.target.checked ? 'must' : 'should') }), T.must),
+          h('label', null, h('input', { type: 'checkbox', checked: draft.resolved, onchange: (e) => (draft.resolved = e.target.checked) }), T.resolved)),
         h('div', { class: 'btns' },
           isNew ? null : h('button', { class: 'btn dan', text: T.del, onclick: () => remove(a) }),
           isNew ? null : h('button', { class: 'btn', text: T.reanchorBtn, title: T.reanchorTitle, onclick: () => startReanchor(a) }),
@@ -796,7 +798,7 @@
       Object.assign(a, draft, { updated: Date.now() });
       if (isNew) state.annotations.push(a);
       closeEditor(); render(); save();
-      if (isNew) toast(T.added(TYPES[a.type].icon, a._n));
+      if (isNew) toast(T.added(a._n));
     };
     ed._keys = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { commit(); return true; } };
     editorEl = ed;
@@ -849,16 +851,15 @@
       h('div', { class: 'sh' },
         h('div', { class: 'st' }, T.sideTitle,
           h('button', { class: 'btn x', text: T.langBtn, title: T.langTitle, onclick: () => setLang(LANG === 'zh' ? 'en' : 'zh') }),
-          h('button', { class: 'btn', style: 'margin-left:6px', text: '✕', onclick: () => toggleSide(false) })),
+          h('button', { class: 'btn', style: 'margin-left:6px', text: '×', onclick: () => toggleSide(false) })),
         h('div', { class: 'sub', text: T.stats(open.length, must, all.length - open.length) }),
-        h('div', { class: 'sub sync', text: SYNC_LABEL[sync].join(' ') }),
+        h('div', { class: 'sub sync' }, syncDot(), T.sync[sync]),
         h('div', { class: 'chips' },
           h('button', { class: 'chip' + (!filterType ? ' on' : ''), style: '--c:#6b7280', text: T.all, onclick: () => { filterType = null; renderSide(); } }),
           ORDER.filter((k) => all.some((a) => a.type === k)).map((k) => h('button', {
             class: 'chip' + (filterType === k ? ' on' : ''), style: '--c:' + TYPES[k].color,
-            text: TYPES[k].icon + ' ' + all.filter((a) => a.type === k).length,
             onclick: () => { filterType = filterType === k ? null : k; renderSide(); },
-          }))),
+          }, h('span', { class: 'dot' }), TYPES[k].label + ' ' + all.filter((a) => a.type === k).length))),
         h('div', { class: 'flags' },
           chk(T.showResolved, showResolved, (v) => { showResolved = v; render(); }),
           chk(T.hideMarks, hidden, (v) => { hidden = v; render(); }))),
@@ -872,7 +873,7 @@
             onclick: () => { detail = k; try { localStorage.setItem(PREF, k); } catch (e) {} renderSide(); },
           })))),
         h('button', { class: 'btn pri', text: T.copy, title: T.copyTitle, onclick: copyMd }),
-        h('button', { class: 'btn', text: '⬇️ JSON', title: T.jsonTitle, onclick: downloadJson }),
+        h('button', { class: 'btn', text: 'JSON', title: T.jsonTitle, onclick: downloadJson }),
         h('button', { class: 'btn', text: T.importBtn, onclick: importJson }),
         h('button', { class: 'btn dan', text: T.clear, onclick: () => {
           if (!state.annotations.length || !confirm(T.clearConfirm(state.annotations.length))) return;
@@ -883,15 +884,15 @@
     const t = TYPES[a.type] || TYPES.comment;
     return h('div', { class: 'card' + (a.resolved ? ' res' : ''), style: '--c:' + t.color, onclick: (e) => focusAnn(a) },
       h('div', { class: 'ct' },
-        h('span', { class: 'n', text: '#' + a._n }), t.icon + ' ' + t.label,
+        h('span', { class: 'n', text: a._n }), t.label,
         a.priority === 'must' ? h('span', { class: 'must', text: T.must }) : null,
-        a.resolved ? h('span', { text: '✅' }) : null,
+        a.resolved ? h('span', { class: 'done', text: T.resolved }) : null,
         a._orphan ? h('span', { class: 'orph', text: T.orphanShort }) : null,
         a.heading ? h('span', { class: 'loc', text: '§ ' + a.heading }) : null),
-      h('div', { class: 'cq', text: a.kind === 'text' ? T.lq + a.quote + T.rq : (a.kind === 'region' ? T.regionIn : '📍 <') + a.tag + '> ' + (a.snippet || '') }),
+      h('div', { class: 'cq', text: a.kind === 'text' ? T.lq + a.quote + T.rq : (a.kind === 'region' ? T.regionIn : '<') + a.tag + '> ' + (a.snippet || '') }),
       a.replacement ? h('div', { class: 'cn', text: '→ ' + a.replacement }) : null,
       a.note ? h('div', { class: 'cn', text: a.note }) : null,
-      a.reply ? h('div', { class: 'cq', text: '🤖 ' + a.reply }) : null);
+      a.reply ? h('div', { class: 'cq', text: T.aiReply + a.reply }) : null);
   }
   function focusAnn(a) {
     let el = a.kind === 'text' ? document.querySelector('mark.p4h-hl[data-p4h="' + a.id + '"]') : pinLayer.querySelector('[data-p4h="' + a.id + '"]');
@@ -917,7 +918,7 @@
       for (const a of open) {
         const t = TYPES[a.type] || TYPES.comment;
         const where = a.kind === 'text' ? q(ws(a.quote).slice(0, 60)) : '[' + (a.kind === 'region' ? M.region : M.point) + ' § ' + (a.heading || M.top) + ' <' + a.tag + '>]';
-        L.push(a._n + '. ' + t.icon + t.label + (a.priority === 'must' ? '❗' : '') + ' ' + where +
+        L.push(a._n + '. ' + t.label + (a.priority === 'must' ? M.mustTag : '') + ' ' + where +
           (a.replacement ? ' → ' + q(a.replacement) : '') + (a.note ? ' — ' + a.note.replace(/\n/g, ' ') : ''));
       }
       return L.join('\n');
@@ -929,7 +930,7 @@
       M.summary(open.length, must, done.length), ''];
     const one = (a) => {
       const t = TYPES[a.type] || TYPES.comment;
-      L.push('## ' + a._n + '. ' + t.icon + ' ' + t.label + (a.priority === 'must' ? M.mustTag : '') + (a._orphan ? M.orphan : ''));
+      L.push('## ' + a._n + '. ' + t.label + (a.priority === 'must' ? M.mustTag : '') + (a._orphan ? M.orphan : ''));
       L.push(M.loc + (a.heading ? '§ ' + a.heading : M.beforeFirst));
       const pct = (v) => Math.round(v * 100) + '%';
       if (a.kind === 'text') {

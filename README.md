@@ -34,11 +34,12 @@ Your browser opens the report. Then:
 | `Alt+R` / `Alt+H` | Annotation list / hide all annotations |
 | `Shift` + right-click | Native browser menu |
 
-**Types:** 💬 Comment · ✏️ Rewrite (with replacement) · ✂️ Delete · ➕ Add · 🔍 Verify · ❓ Question · 🎨 Layout · 👍 Keep — plus 🔴 must-fix and ✅ resolved flags.
+**Types:** Comment · Rewrite (with replacement) · Delete · Add · Verify · Question · Layout · Keep — plus must-fix and resolved flags.
+On the page each annotation is a thin colored underline with a `[n]` marker (must-fix = solid red number).
 
 ### Hand it to your AI
 
-Every change is written to `report.pins.json` (🟢 in the corner = synced). On the agent side:
+Every change is written to `report.pins.json` (green dot in the corner = synced). On the agent side:
 
 ```bash
 python pin4html.py show report.html                       # read pins (compact, numbered, with context)
@@ -52,7 +53,7 @@ python pin4html.py reply report.html --file replies.json  # write replies back
   "3": "Removed — it duplicated the table" }
 ```
 
-Within ~2 s the open page shows "🤖 AI replied"; if the report itself changed, it offers to reload.
+Within ~2 s the open page shows "AI replied"; if the report itself changed, it offers to reload.
 Concurrent edits (you on the page, the agent on the file) are merged per annotation with optimistic locking — nothing gets overwritten.
 
 ### Install as a Claude Code skill
@@ -115,8 +116,8 @@ python pin4html.py serve report.html
 ```
 
 - **操作**：選文字＋右鍵＝文字標記；空白處右鍵＝圖釘；`Alt+D`＝框選區域；`Alt+R`＝清單；`Alt+H`＝隱藏標記；`Shift`＋右鍵＝原生選單
-- **類型**：💬留言 ✏️改寫 ✂️刪除 ➕補充 🔍查證 ❓疑問 🎨版面 👍保留，另有 🔴必改、✅已解決
-- **交給 AI**：`show` 讀標記、`reply --file replies.json` 寫回覆，開著的頁面約 2 秒內出現「🤖 收到 AI 回覆」
+- **類型**：留言、改寫、刪除、補充、查證、疑問、版面、保留，另有必改、已解決；頁面上以細底線＋`[n]` 編號呈現（必改＝紅色實心編號）
+- **交給 AI**：`show` 讀標記、`reply --file replies.json` 寫回覆，開著的頁面約 2 秒內出現「收到 AI 回覆」
 - **Claude Code skill**：`git clone https://github.com/youllook/Pin4Html ~/.claude/skills/pin4html`，之後說「我要審閱這份報告」即可
 - **離線 / 分享**：`inject`（內嵌）、`inject --cdn`、`strip`；或在任何 HTML 加上 CDN 那一行
 - **語言**：預設跟隨瀏覽器；`?p4hlang=zh`、側欄「EN / 中」按鈕、`data-lang` 或 `--lang` 可覆寫
