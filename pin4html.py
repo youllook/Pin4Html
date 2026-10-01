@@ -23,6 +23,7 @@ import sys
 import threading
 import time
 import webbrowser
+from contextlib import contextmanager
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -39,9 +40,12 @@ TYPES = {
 }
 
 
+LOCK = threading.Lock()
+LOCAL_HOSTS = ('127.0.0.1', 'localhost', '::1')
+
+
 def lang_attr(lang):
     return f' data-lang="{lang}"' if lang else ''
-LOCK = threading.Lock()
 
 
 # ---------- helpers ----------
@@ -66,12 +70,46 @@ def sidecar(html_path: Path) -> Path:
 
 
 def load_pins(p: Path) -> dict:
-    if not p.exists():
-        return {'annotations': [], 'deleted': [], 'rev': 0}
-    try:
-        return json.loads(read_text(p))
-    except json.JSONDecodeError:
-        return {'annotations': [], 'deleted': [], 'rev': 0}
+    for i in range(20):  # Windows: reads fail briefly while write_json swaps the file in
+        if not p.exists():
+            return {'annotations': [], 'deleted': [], 'rev': 0}
+        try:
+            return json.loads(read_text(p))
+        except json.JSONDecodeError:
+            return {'annotations': [], 'deleted': [], 'rev': 0}
+        except PermissionError:
+            if i == 19:
+                raise
+            time.sleep(0.05)
+
+
+@contextmanager
+def pins_lock(p: Path, timeout=5.0, stale=30.0):
+    """Cross-process lock on a .pins.json (the server and `reply` run as separate processes)."""
+    lock = p.with_name(p.name + '.lock')
+    deadline = time.time() + timeout
+    with LOCK:
+        while True:
+            try:
+                os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+                break
+            except FileExistsError:
+                try:
+                    if time.time() - lock.stat().st_mtime > stale:  # left behind by a crashed process
+                        lock.unlink()
+                        continue
+                except FileNotFoundError:
+                    continue
+                if time.time() > deadline:
+                    raise TimeoutError(f'{lock} is held by another process')
+                time.sleep(0.02)
+        try:
+            yield
+        finally:
+            try:
+                lock.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def write_json(p: Path, data: dict):
@@ -123,7 +161,7 @@ class Handler(SimpleHTTPRequestHandler):
             return None
         return html
 
-    def do_GET(self):
+    def _get(self):
         u = urlparse(self.path)
         path = unquote(u.path)
         if path == '/':
@@ -148,7 +186,36 @@ class Handler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
+    def _trusted(self, write=False) -> bool:
+        # Host check blocks DNS rebinding; Origin / Sec-Fetch-Site block other sites POSTing to localhost
+        # (a text/plain POST needs no CORS preflight). Requests without these headers (curl, scripts) pass.
+        host = self.headers.get('Host', '')
+        if urlparse('//' + host).hostname not in LOCAL_HOSTS:
+            return False
+        if write:
+            origin = self.headers.get('Origin')
+            if origin and urlparse(origin).netloc != host:
+                return False
+            if self.headers.get('Sec-Fetch-Site') not in (None, 'same-origin', 'none'):
+                return False
+        return True
+
+    def do_HEAD(self):
+        if not self._trusted():
+            self._json(403, {'error': 'forbidden'})
+            return
+        super().do_HEAD()
+
+    def do_GET(self):
+        if not self._trusted():
+            self._json(403, {'error': 'forbidden'})
+            return
+        self._get()
+
     def do_POST(self):
+        if not self._trusted(write=True):
+            self._json(403, {'error': 'forbidden'})
+            return
         if urlparse(self.path).path != '/__pin4html/pins':
             self._json(404, {'error': 'not found'})
             return
@@ -161,14 +228,14 @@ class Handler(SimpleHTTPRequestHandler):
             self._json(400, {'error': 'bad json'})
             return
         p = sidecar(html)
-        with LOCK:
+        with pins_lock(p):
             cur = load_pins(p)
             if body.get('baseRev', 0) != cur.get('rev', 0):
                 self._json(409, cur)
                 return
             data = body.get('data') or {}
             data['rev'] = cur.get('rev', 0) + 1
-            data['file'] = str(html)
+            data['file'] = html.name  # relative: the sidecar always sits next to the report
             data['title'] = data.get('title') or ''
             write_json(p, data)
         self._json(200, {'rev': data['rev']})
@@ -270,7 +337,7 @@ def cmd_show(a):
 def cmd_reply(a):
     p = resolve_pins(a.html)
     replies = json.loads(read_text(Path(a.file)))
-    with LOCK:
+    with pins_lock(p):
         data = load_pins(p)
         anns = data.get('annotations', [])
         now = int(time.time() * 1000)
