@@ -203,12 +203,22 @@
     stamp(r);
     return normalize(await r.json());
   }
+  // 逐則合併：較新的 updated 勝出；但 AI 回覆（replyAt）另外比，避免使用者同時編輯同一則時把回覆蓋掉
+  function mergeOne(x, y) {
+    const [win, lose] = (x.updated || x.created || 0) > (y.updated || y.created || 0) ? [x, y] : [y, x];
+    if ((lose.replyAt || 0) <= (win.replyAt || 0)) return win;
+    // 原地改 win：若 win 是頁面上的物件，開著的編輯器仍持有同一個參照
+    Object.assign(win, { reply: lose.reply, replyAt: lose.replyAt });
+    if ('replyResolved' in lose) Object.assign(win, { resolved: lose.replyResolved, replyResolved: lose.replyResolved });
+    else delete win.replyResolved;
+    return win;
+  }
   function merge(a, b) {
     const del = new Set([...a.deleted, ...b.deleted]), map = new Map();
     for (const x of [...a.annotations, ...b.annotations]) {
       if (del.has(x.id)) continue;
       const y = map.get(x.id);
-      if (!y || (x.updated || x.created || 0) > (y.updated || y.created || 0)) map.set(x.id, x);
+      map.set(x.id, y ? mergeOne(x, y) : x);
     }
     return Object.assign({}, a, { annotations: [...map.values()], deleted: [...del], rev: Math.max(a.rev, b.rev) });
   }
@@ -244,6 +254,8 @@
     try {
       const cur = await pull();
       if (sync !== 'synced') setSync('synced');
+      // 檔案版本倒退（壞檔被移到 .corrupt-*、或被刪掉）→ 用頁面上的標記補存回去
+      if (cur.rev < state.rev && state.annotations.length) { scheduleSync(); return; }
       let msg = '';
       if (cur.rev > state.rev && !menuEl && !editorEl && !dirty && !inflight) {
         const hadReply = cur.annotations.some((a) => a.reply && a.reply !== (byId(a.id) || {}).reply);

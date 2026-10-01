@@ -2,5 +2,6 @@
 !examples/*.pins.json
 *.pins.json.tmp
 *.pins.json.lock
+*.pins.json.corrupt-*
 *.review.html
 __pycache__/

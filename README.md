@@ -102,6 +102,7 @@ See [`examples/demo-en.pins.json`](examples/demo-en.pins.json). Each annotation:
 | `heading` | Nearest heading above |
 | `note` `replacement` | Note; replacement / content to add |
 | `priority` `resolved` `reply` | `must`/`should`, resolved flag, AI reply |
+| `replyAt` `replyResolved` | Set by `reply` so a reply survives a simultaneous edit on the page |
 
 ---
 

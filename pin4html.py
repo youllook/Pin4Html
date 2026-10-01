@@ -69,18 +69,38 @@ def sidecar(html_path: Path) -> Path:
     return html_path.with_name(stem + '.pins.json')
 
 
+def empty_pins() -> dict:
+    return {'annotations': [], 'deleted': [], 'rev': 0}
+
+
+def set_aside(p: Path) -> Path:
+    """Move a corrupt pins file out of the way (never delete it), so the next save starts clean."""
+    bak = p.with_name(p.name + time.strftime('.corrupt-%Y%m%d-%H%M%S'))
+    os.replace(p, bak)
+    print(f'Warning: {p.name} is not valid pins JSON — moved to {bak.name}. '
+          'An open review page will re-save its annotations automatically.', file=sys.stderr, flush=True)
+    return bak
+
+
 def load_pins(p: Path) -> dict:
     for i in range(20):  # Windows: reads fail briefly while write_json swaps the file in
         if not p.exists():
-            return {'annotations': [], 'deleted': [], 'rev': 0}
+            return empty_pins()
         try:
-            return json.loads(read_text(p))
-        except json.JSONDecodeError:
-            return {'annotations': [], 'deleted': [], 'rev': 0}
+            data = json.loads(read_text(p))
+            if isinstance(data, dict) and isinstance(data.get('annotations', []), list):
+                return data
+            raise ValueError('unexpected structure')
         except PermissionError:
             if i == 19:
                 raise
             time.sleep(0.05)
+        except ValueError:  # JSONDecodeError is a ValueError
+            try:
+                set_aside(p)
+            except FileNotFoundError:  # another request already moved it
+                pass
+            return empty_pins()
 
 
 @contextmanager
@@ -352,6 +372,13 @@ def cmd_reply(a):
             for k in ('reply', 'resolved'):
                 if k in val:
                     ann[k] = val[k]
+            # replyAt / replyResolved let the page merge this reply field by field, so an edit the
+            # user makes to the same annotation at the same time can't drop it (see merge() in pin4html.js)
+            ann['replyAt'] = now
+            if 'resolved' in val:
+                ann['replyResolved'] = val['resolved']
+            else:
+                ann.pop('replyResolved', None)
             ann['updated'] = now
             hit += 1
         data['rev'] = data.get('rev', 0) + 1
@@ -362,6 +389,7 @@ def cmd_reply(a):
 
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
     ap = argparse.ArgumentParser(description='Pin4Html — annotate HTML reports for your AI')
     sub = ap.add_subparsers(dest='cmd', required=True)
     s = sub.add_parser('serve'); s.add_argument('html'); s.add_argument('--port', type=int, default=8770)
