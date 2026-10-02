@@ -10,6 +10,9 @@ Zero dependencies (Python 3.8+ standard library only).
                          annotations live in browser localStorage). --cdn references jsDelivr instead.
   strip  <file.html>     Remove an injected annotator.
   show   <report.html>   Print the pins as a compact list (what the AI reads).
+  watch  <report.html>   Block until there are "fix now" pins the AI hasn't handled yet and the reviewer
+                         has paused for a few seconds, print them like `show`, then exit.
+                         Run it in the background, fix + `reply`, run it again.
   reply  <report.html> --file replies.json
                          Write AI replies back: {"<n or id>": {"reply": "...", "resolved": true}}.
                          The open page picks them up within ~2 s.
@@ -36,7 +39,7 @@ START, END = '<!-- pin4html:start -->', '<!-- pin4html:end -->'
 BLOCK_RE = re.compile(re.escape(START) + r'.*?' + re.escape(END) + r'\s*', re.S)
 TYPES = {
     'comment': 'comment', 'rewrite': 'rewrite', 'delete': 'delete', 'add': 'add',
-    'verify': 'verify', 'question': 'question', 'style': 'layout', 'keep': 'keep',
+    'verify': 'verify', 'question': 'question', 'style': 'layout',
 }
 
 
@@ -326,32 +329,77 @@ def resolve_pins(path: str) -> Path:
     return p if p.name.endswith('.pins.json') else sidecar(p)
 
 
+def print_pin(x):
+    t = TYPES.get(x.get('type'), x.get('type'))
+    if x.get('type') == 'keep':  # removed in v1.3; old files may still have it
+        t = 'comment'
+    flag = '' if x.get('priority') == 'must' else ' [later]'
+    done = ' [done]' if x.get('resolved') else ''
+    print(f'\n## #{x.get("n", "?")} {t}{flag}{done}  id={x["id"]}  § {x.get("heading") or "(top)"}')
+    if x.get('kind') == 'text':
+        print(f'  quote: "{x.get("quote", "")}"')
+        print(f'  context: …{x.get("prefix", "")}【{x.get("quote", "")}】{x.get("suffix", "")}…'.replace('\n', ' '))
+    elif x.get('kind') == 'region':
+        print(f'  area: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}  '
+              f'x={x.get("rx", 0):.0%} y={x.get("ry", 0):.0%} w={x.get("rw", 0):.0%} h={x.get("rh", 0):.0%}')
+    else:
+        print(f'  pin: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}')
+    if x.get('replacement'):
+        print(f'  replacement: "{x["replacement"]}"')
+    if x.get('note'):
+        print(f'  note: {x["note"]}')
+    if x.get('reply'):
+        print(f'  replied: {x["reply"]}')
+
+
+def by_position(data):
+    return sorted(data.get('annotations', []), key=lambda x: (x.get('n') or 1e9, x.get('created', 0)))
+
+
 def cmd_show(a):
     p = resolve_pins(a.html)
     data = load_pins(p)
-    items = sorted(data.get('annotations', []), key=lambda x: (x.get('n') or 1e9, x.get('created', 0)))
+    items = by_position(data)
     if not a.all:
         items = [x for x in items if not x.get('resolved')]
-    print(f'# {p.name}  rev={data.get("rev", 0)}  {len(items)} {"total" if a.all else "open"}')
+    print(f'# {p.name}  rev={data.get("rev", 0)}  {len(items)} {"total" if a.all else "pending"}')
     for x in items:
-        t = TYPES.get(x.get('type'), x.get('type'))
-        flag = ' [MUST-FIX]' if x.get('priority') == 'must' else ''
-        done = ' [resolved]' if x.get('resolved') else ''
-        print(f'\n## #{x.get("n", "?")} {t}{flag}{done}  id={x["id"]}  § {x.get("heading") or "(top)"}')
-        if x.get('kind') == 'text':
-            print(f'  quote: "{x.get("quote", "")}"')
-            print(f'  context: …{x.get("prefix", "")}【{x.get("quote", "")}】{x.get("suffix", "")}…'.replace('\n', ' '))
-        elif x.get('kind') == 'region':
-            print(f'  area: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}  '
-                  f'x={x.get("rx", 0):.0%} y={x.get("ry", 0):.0%} w={x.get("rw", 0):.0%} h={x.get("rh", 0):.0%}')
-        else:
-            print(f'  pin: <{x.get("tag")}> "{x.get("snippet", "")}" {x.get("path")}')
-        if x.get('replacement'):
-            print(f'  replacement: "{x["replacement"]}"')
-        if x.get('note'):
-            print(f'  note: {x["note"]}')
-        if x.get('reply'):
-            print(f'  replied: {x["reply"]}')
+        print_pin(x)
+
+
+def needs_ai(x) -> bool:
+    """A pending "fix now" pin the reviewer touched after the AI's last reply (or never replied to)."""
+    return (x.get('priority') == 'must' and not x.get('resolved')
+            and (x.get('updated') or x.get('created') or 0) > (x.get('replyAt') or 0))
+
+
+def cmd_watch(a):
+    p = resolve_pins(a.html)
+    print(f'Watching {p.name} for fix-now pins (quiet {a.quiet:g}s)…', file=sys.stderr, flush=True)
+    start = time.time()
+    seen, stable_since, checked = object(), time.time(), object()
+    while True:
+        try:
+            sig = p.stat().st_mtime_ns
+        except FileNotFoundError:
+            sig = None
+        if sig != seen:
+            seen, stable_since = sig, time.time()
+        # wait until the reviewer has paused, then look once per file version
+        if sig is not None and sig != checked and time.time() - stable_since >= a.quiet:
+            checked = sig
+            data = load_pins(p)
+            todo = [x for x in by_position(data) if needs_ai(x)]
+            if todo:
+                print(f'# {p.name}  rev={data.get("rev", 0)}  {len(todo)} to fix now')
+                print('# Edit the report, `reply` to each (resolved: true when fixed), then run `watch` again.')
+                for x in todo:
+                    print_pin(x)
+                return
+        if a.timeout and time.time() - start > a.timeout:
+            print('No fix-now pins before timeout.', file=sys.stderr)
+            sys.exit(2)
+        time.sleep(0.5)
 
 
 def cmd_reply(a):
@@ -400,6 +448,10 @@ def main():
     s.set_defaults(fn=cmd_inject)
     s = sub.add_parser('strip'); s.add_argument('html'); s.add_argument('--out'); s.set_defaults(fn=cmd_strip)
     s = sub.add_parser('show'); s.add_argument('html'); s.add_argument('--all', action='store_true'); s.set_defaults(fn=cmd_show)
+    s = sub.add_parser('watch'); s.add_argument('html')
+    s.add_argument('--quiet', type=float, default=3, help='seconds without changes before acting (default 3)')
+    s.add_argument('--timeout', type=float, default=0, help='give up after N seconds (0 = wait forever)')
+    s.set_defaults(fn=cmd_watch)
     s = sub.add_parser('reply'); s.add_argument('html'); s.add_argument('--file', required=True); s.set_defaults(fn=cmd_reply)
     a = ap.parse_args()
     a.fn(a)

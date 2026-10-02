@@ -31,31 +31,31 @@
     types: {
       comment: ['留言', '一般意見'], rewrite: ['改寫', '換個說法', '改為'], delete: ['刪除', '整段拿掉'],
       add: ['補充', '這裡要加內容', '補充內容'], verify: ['查證', '數據／出處待確認'], question: ['疑問', '看不懂／為什麼'],
-      style: ['版面', '排版／圖表／格式'], keep: ['保留', '這段好，別動'],
+      style: ['版面', '排版／圖表／格式'],
     },
     sync: {
       local: '僅存在此瀏覽器（用「複製給 AI」或匯出 JSON 交回）', connecting: '連線中…', saving: '儲存中…',
       synced: '已自動同步到檔案，AI 可直接讀取', offline: '伺服器離線，改動暫存在頁面，恢復後自動補存',
     },
     lsFail: '無法寫入 localStorage，請記得匯出 JSON',
-    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告內容已修改', reloadNew: '重新載入看新版',
+    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告已更新', reloadNew: '重新載入看新版',
     clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
     fabTitle: '審閱標記（Alt+R）', fabLabel: '標記', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
     drawTip: '拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
     headText: (q) => '標記選取：「' + q + '」', headRegion: (t) => '標記框選區域（' + t + ' 內）',
     headPin: (t) => '在此處釘一個標記（虛線框＝會附著的元素 ' + t + '）',
     toRegion: '改成框選區域…', openList: '開啟標記清單',
-    edit: '編輯…', changeTo: (l) => '改成「' + l + '」', unmust: '取消必改', setMust: '標為必改',
-    reopen: '重新開啟', setResolved: '標為已解決', reanchorRange: '重新框選範圍', delAnn: '刪除標記',
+    edit: '編輯…', changeTo: (l) => '改成「' + l + '」', unmust: '改成稍後處理', setMust: '改成立即處理',
+    reopen: '改回待處理', setResolved: '標為已處理', reanchorRange: '重新框選範圍', delAnn: '刪除標記',
     quickAdded: (l, n) => '已新增「' + l + '」#' + n + '（點標記可補說明）', addNote: '補說明',
     deleted: (n) => '已刪除標記 #' + n, undo: '復原',
     notePh: (hint) => hint + '…（Ctrl+Enter 儲存，Esc 取消）',
     orphanLong: '頁面上找不到原文（內容可能已被修改），可用「重新框選」重新定位',
-    note: '說明', aiReply: 'AI 回覆：', must: '必改', resolved: '已解決',
+    note: '說明', aiReply: 'AI 回覆：', must: '立即處理', later: '稍後', resolved: '已處理', pending: '待處理', status: '狀態',
     del: '刪除', reanchorBtn: '重新框選', reanchorTitle: '選取新的文字範圍來重新定位', cancel: '取消', save: '儲存',
     added: (n) => '已新增 #' + n, reanchorTip: (n) => '請選取新的文字範圍來定位 #' + n + '（Esc 取消）',
-    sideTitle: '審閱標記', stats: (o, m, d) => '未解決 ' + o + ' 則（必改 ' + m + '）・已解決 ' + d + ' 則',
-    all: '全部', showResolved: '顯示已解決', hideMarks: '隱藏頁面標記',
+    sideTitle: '審閱標記', stats: (o, m, d) => '待處理 ' + o + ' 則（立即處理 ' + m + '）・已處理 ' + d + ' 則',
+    all: '全部', showResolved: '顯示已處理', hideMarks: '隱藏頁面標記',
     empty: ['還沒有標記', '選取文字後按右鍵，或直接在任意位置按右鍵', 'Shift+右鍵 = 原生選單'],
     detail: '輸出詳細度', levels: { brief: '精簡', std: '標準', full: '詳細' },
     levelTips: { brief: '一則一行，省 token', std: '原文＋位置＋說明', full: '再加上下文、選擇器、時間（定位最穩）' },
@@ -67,12 +67,12 @@
     langBtn: 'EN', langTitle: 'Switch to English',
     md: {
       title: '# 審閱意見：', count: (n) => '（' + n + ' 則）', region: '區域', point: '位置', top: '開頭',
-      file: '- 檔案：', exported: '- 匯出：', summary: (o, m, d) => '- 未解決 ' + o + ' 則（必改 ' + m + '）；已解決 ' + d + ' 則',
-      mustTag: '【必改】', orphan: '（頁面上已找不到原文）', loc: '- 位置：', beforeFirst: '（第一個標題之前）',
+      file: '- 檔案：', exported: '- 匯出：', summary: (o, m, d) => '- 待處理 ' + o + ' 則（立即處理 ' + m + '）；已處理 ' + d + ' 則',
+      laterTag: '（稍後處理）', orphan: '（頁面上已找不到原文）', loc: '- 位置：', beforeFirst: '（第一個標題之前）',
       quote: '- 原文：', context: '- 上下文：', selector: '- 選擇器：', content: '內容', note: '- 說明：', reply: '- AI 回覆：',
       regionLine: (t, s, x, y, w, h) => '- 框選區域：`<' + t + '>`「' + s + '」內，左 ' + x + '、上 ' + y + '、寬 ' + w + '、高 ' + h,
       pinLine: (t, s) => '- 標記點：`<' + t + '>`「' + s + '」',
-      meta: (id, c, u) => '- id：`' + id + '`・建立 ' + c + (u ? '・更新 ' + u : ''), resolvedHead: '### 已解決（僅供參考）',
+      meta: (id, c, u) => '- id：`' + id + '`・建立 ' + c + (u ? '・更新 ' + u : ''), resolvedHead: '### 已處理（僅供參考）',
     },
   };
   const EN = {
@@ -80,31 +80,31 @@
       comment: ['Comment', 'General feedback'], rewrite: ['Rewrite', 'Say it differently', 'Replace with'],
       delete: ['Delete', 'Remove this'], add: ['Add', 'Add content here', 'Content to add'],
       verify: ['Verify', 'Check data / source'], question: ['Question', 'Unclear / why?'],
-      style: ['Layout', 'Layout / chart / format'], keep: ['Keep', "Good — don't touch"],
+      style: ['Layout', 'Layout / chart / format'],
     },
     sync: {
       local: 'Stored in this browser only (use "Copy for AI" or export JSON)', connecting: 'Connecting…', saving: 'Saving…',
       synced: 'Auto-saved to file — your AI can read it', offline: 'Server offline — changes kept here, will retry',
     },
     lsFail: 'Cannot write to localStorage — remember to export JSON',
-    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report changed', reloadNew: 'Reload',
+    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report updated', reloadNew: 'Reload',
     clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
     fabTitle: 'Annotations (Alt+R)', fabLabel: 'Notes', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
     drawTip: 'Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
     headText: (q) => 'Annotate selection: "' + q + '"', headRegion: (t) => 'Annotate boxed area (inside ' + t + ')',
     headPin: (t) => 'Drop a pin here (dashed box = attached element ' + t + ')',
     toRegion: 'Box an area instead…', openList: 'Open annotation list',
-    edit: 'Edit…', changeTo: (l) => 'Change to "' + l + '"', unmust: 'Unmark must-fix', setMust: 'Mark as must-fix',
-    reopen: 'Reopen', setResolved: 'Mark resolved', reanchorRange: 'Re-select range', delAnn: 'Delete annotation',
+    edit: 'Edit…', changeTo: (l) => 'Change to "' + l + '"', unmust: 'Move to later', setMust: 'Fix now',
+    reopen: 'Mark pending', setResolved: 'Mark done', reanchorRange: 'Re-select range', delAnn: 'Delete annotation',
     quickAdded: (l, n) => 'Added "' + l + '" #' + n + ' (click it to add a note)', addNote: 'Add note',
     deleted: (n) => 'Deleted #' + n, undo: 'Undo',
     notePh: (hint) => hint + '… (Ctrl+Enter to save, Esc to cancel)',
     orphanLong: 'Original text not found on the page (it may have changed). Use "Re-select" to re-anchor.',
-    note: 'Note', aiReply: 'AI reply: ', must: 'Must-fix', resolved: 'Resolved',
+    note: 'Note', aiReply: 'AI reply: ', must: 'Fix now', later: 'Later', resolved: 'Done', pending: 'Pending', status: 'Status',
     del: 'Delete', reanchorBtn: 'Re-select', reanchorTitle: 'Select new text to re-anchor', cancel: 'Cancel', save: 'Save',
     added: (n) => 'Added #' + n, reanchorTip: (n) => 'Select new text to re-anchor #' + n + ' (Esc to cancel)',
-    sideTitle: 'Annotations', stats: (o, m, d) => o + ' open (' + m + ' must-fix) · ' + d + ' resolved',
-    all: 'All', showResolved: 'Show resolved', hideMarks: 'Hide on page',
+    sideTitle: 'Annotations', stats: (o, m, d) => o + ' pending (' + m + ' fix now) · ' + d + ' done',
+    all: 'All', showResolved: 'Show done', hideMarks: 'Hide on page',
     empty: ['No annotations yet', 'Select text and right-click, or right-click anywhere', 'Shift+right-click = browser menu'],
     detail: 'Export detail', levels: { brief: 'Brief', std: 'Standard', full: 'Full' },
     levelTips: { brief: 'One line each — fewer tokens', std: 'Quote + location + note', full: 'Adds context, selector, timestamps (most robust)' },
@@ -116,12 +116,12 @@
     langBtn: '中', langTitle: '切換成中文',
     md: {
       title: '# Review notes: ', count: (n) => ' (' + n + ')', region: 'area', point: 'pin', top: 'top',
-      file: '- File: ', exported: '- Exported: ', summary: (o, m, d) => '- ' + o + ' open (' + m + ' must-fix); ' + d + ' resolved',
-      mustTag: ' [MUST-FIX]', orphan: ' (original text no longer found)', loc: '- Location: ', beforeFirst: '(before the first heading)',
+      file: '- File: ', exported: '- Exported: ', summary: (o, m, d) => '- ' + o + ' pending (' + m + ' fix now); ' + d + ' done',
+      laterTag: ' (later)', orphan: ' (original text no longer found)', loc: '- Location: ', beforeFirst: '(before the first heading)',
       quote: '- Quote: ', context: '- Context: ', selector: '- Selector: ', content: 'Content', note: '- Note: ', reply: '- AI reply: ',
       regionLine: (t, s, x, y, w, h) => '- Area: inside `<' + t + '>` "' + s + '", left ' + x + ', top ' + y + ', width ' + w + ', height ' + h,
       pinLine: (t, s) => '- Pin: `<' + t + '>` "' + s + '"',
-      meta: (id, c, u) => '- id: `' + id + '` · created ' + c + (u ? ' · updated ' + u : ''), resolvedHead: '### Resolved (for reference)',
+      meta: (id, c, u) => '- id: `' + id + '` · created ' + c + (u ? ' · updated ' + u : ''), resolvedHead: '### Done (for reference)',
     },
   };
   const T = LANG === 'zh' ? ZH : EN;
@@ -133,7 +133,7 @@
   }
 
   const TYPES = {
-    // 5 組語意色：留言/疑問=藍、改寫/補充/版面=琥珀、刪除=紅、查證=紫、保留=綠
+    // 4 組語意色：留言/疑問=藍、改寫/補充/版面=琥珀、刪除=紅、查證=紫
     comment:  { color: '#2f7bcb' },
     rewrite:  { color: '#b7701a' },
     delete:   { color: '#d03b3a', quick: true },
@@ -141,7 +141,6 @@
     verify:   { color: '#6a5fd0' },
     question: { color: '#2f7bcb' },
     style:    { color: '#b7701a' },
-    keep:     { color: '#4f8a1b', quick: true },
   };
   for (const k in TYPES) { const [label, hint, field] = T.types[k]; Object.assign(TYPES[k], { label, hint, field }); }
   const ORDER = Object.keys(TYPES);
@@ -167,6 +166,7 @@
     if (!s || !Array.isArray(s.annotations)) s = Object.assign({}, s, { annotations: [] });
     if (!Array.isArray(s.deleted)) s.deleted = [];
     s.rev = s.rev || 0;
+    for (const a of s.annotations) if (a.type === 'keep') a.type = 'comment';  // 「保留」已移除（v1.3）
     return s;
   }
   const strip_ = (k, v) => (k[0] === '_' ? undefined : v);
@@ -262,11 +262,36 @@
         state = cur; render();
         msg = hadReply ? T.gotReply : T.pinsUpdated;
       }
-      if (htmlChanged) {
+      if (htmlChanged && !menuEl && !editorEl) {  // 正在編輯就等下一輪
         htmlChanged = false;
-        toast((msg ? msg + T.dot : '') + T.htmlChanged, T.reloadNew, () => location.reload(), 600000);
+        await liveRefresh();
+        toast((msg ? msg + T.dot : '') + T.htmlChanged);
       } else if (msg) toast(msg + T.clickToView);
     } catch (e) { setSync('offline'); }
+  }
+  // 報告檔被改 → 直接換上新內容、保留捲動位置，不用手動重新載入。
+  // 報告自帶 <script>（圖表等）時換內容不會重跑腳本，改成整頁重載並還原捲動位置。
+  const SCROLL_KEY = 'pin4html:scroll:' + FILE;
+  async function liveRefresh() {
+    const r = await fetch(location.href, { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    doc.querySelectorAll('script[data-server]').forEach((e) => e.remove());
+    if (doc.querySelector('script')) {
+      try { sessionStorage.setItem(SCROLL_KEY, String(scrollY)); } catch (e) {}
+      location.reload();
+      return;
+    }
+    const y = scrollY;
+    const old = [...document.head.querySelectorAll('style:not(#pin4html-style), link[rel="stylesheet"]')];
+    for (const e of doc.head.querySelectorAll('style, link[rel="stylesheet"]')) document.head.appendChild(document.importNode(e, true));
+    old.forEach((e) => e.remove());
+    document.title = doc.title;
+    for (const at of [...document.body.attributes]) document.body.removeAttribute(at.name);
+    for (const at of doc.body.attributes) document.body.setAttribute(at.name, at.value);
+    document.body.replaceChildren(...[...doc.body.childNodes].map((n) => document.importNode(n, true)));
+    render();
+    scrollTo(0, y);
   }
   if (SERVER) {
     setInterval(poll, 2000);
@@ -349,7 +374,7 @@
       if (a1 < n.data.length) n.splitText(a1);
       if (a0 > 0) n = n.splitText(a0);
       const m = document.createElement('mark');
-      m.className = 'p4h-hl p4h-t-' + a.type + (a.resolved ? ' p4h-resolved' : '') + (a.priority === 'must' ? ' p4h-must' : '');
+      m.className = 'p4h-hl p4h-t-' + a.type + (a.resolved ? ' p4h-resolved' : '') + (a.priority === 'must' ? '' : ' p4h-later');
       m.dataset.p4h = a.id;
       if (a.note) m.title = a.note;
       n.parentNode.insertBefore(m, n);
@@ -411,14 +436,15 @@
   const UI_CSS = `
   :host{all:initial}
   *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI","Microsoft JhengHei","PingFang TC",sans-serif}
+  .pins{position:absolute;left:0;top:0;overflow:clip;pointer-events:none}.pins>*{pointer-events:auto}.pins>.region{pointer-events:none}
   .ui,.pins{--bg:#fff;--fg:#1f2328;--mut:#6b7280;--bd:#e5e7eb;--hov:#f3f4f6;--acc:#2563eb;color:var(--fg);font-size:13px;line-height:1.45}
   @media (prefers-color-scheme:dark){.ui,.pins{--bg:#1f2329;--fg:#e6e8eb;--mut:#9aa1ab;--bd:#3a414b;--hov:#2a3038;--acc:#60a5fa}}
   .pin{position:absolute;min-width:18px;height:18px;margin-top:-18px;padding:0 5px;border-radius:9px 9px 9px 2px;background:var(--c);color:#fff;
     font:600 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;cursor:grab;box-shadow:0 0 0 1.5px #fff,0 1px 3px rgba(0,0,0,.2);user-select:none;touch-action:none;white-space:nowrap}
-  .pin.res{opacity:.45}.pin.must{background:#d03b3a;box-shadow:0 0 0 1.5px #fff,0 0 0 3px #d03b3a}.pin.drag{cursor:grabbing;opacity:.8}
+  .pin.res{opacity:.45}.pin.later{opacity:.6}.pin.drag{cursor:grabbing;opacity:.8}
   .pin.flash,.region.flash{animation:fl .5s 3}
   .region{position:absolute;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 5%,transparent);border-radius:2px;pointer-events:none}
-  .region.res{opacity:.45;border-style:dashed}.region.must{border-width:2px}.region.must .rl{background:#d03b3a}
+  .region.res{opacity:.45;border-style:dashed}.region.later{border-style:dotted}.region.later .rl{opacity:.6}
   .region .rl{position:absolute;left:-1px;top:-18px;height:18px;padding:0 5px;border-radius:2px 2px 2px 0;background:var(--c);color:#fff;
     font:600 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap;cursor:pointer;pointer-events:auto}
   .target{position:absolute;outline:1px dashed var(--acc);outline-offset:2px;border-radius:2px;background:color-mix(in srgb,var(--acc) 5%,transparent);pointer-events:none}
@@ -447,7 +473,7 @@
   textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
   .quote{border-left:3px solid var(--c);padding:4px 8px;color:var(--mut);max-height:84px;overflow:auto;white-space:pre-wrap;background:var(--hov);border-radius:0 6px 6px 0;font-size:12px}
   .reply{border:1px dashed var(--acc);border-radius:6px;padding:6px 8px;font-size:12px;white-space:pre-wrap}
-  .flags{display:flex;gap:14px;font-size:12px}.flags label{display:flex;gap:4px;align-items:center;cursor:pointer}
+  .flags{display:flex;gap:14px;font-size:12px;align-items:center}.flags .sp{flex:1}.flags label{display:flex;gap:4px;align-items:center;cursor:pointer}
   .btns{display:flex;gap:6px;align-items:center}.btns .sp{flex:1}
   .btn{border:1px solid var(--bd);background:var(--bg);color:var(--fg);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px}
   .btn:hover{background:var(--hov)}
@@ -465,7 +491,7 @@
   .card:hover{background:var(--hov)}.card.res{opacity:.5}
   .ct{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600}
   .ct .n{color:var(--c);font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.ct .n::before{content:"#"}
-  .ct .must{color:#fff;background:#d03b3a;border-radius:3px;padding:0 5px;font-size:11px}.ct .done{color:#16a34a;font-weight:400}.ct .orph{color:#d97706;font-weight:400}
+  .ct .st-pend,.ct .st-done,.ct .later{border-radius:3px;padding:0 5px;font-size:11px;font-weight:500}.ct .st-pend{background:#fff4e5;color:#b45309}.ct .st-done{background:#e7f6ec;color:#15803d}.ct .later{border:1px solid var(--bd);color:var(--mut)}.ct .orph{color:#d97706;font-weight:400}
   .ct .loc{margin-left:auto;color:var(--mut);font-weight:400;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cq{color:var(--mut);font-size:12px;margin-top:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .cn{font-size:13px;margin-top:4px;white-space:pre-wrap}
@@ -477,13 +503,15 @@
   @media print{.ui,.pins{display:none}}
   `;
   function docCss() {
-    // C 極簡線條風：不填底色，細底線＋上標 [n]；必改＝實心紅編號；已解決＝虛線
-    let css = `mark.p4h-hl{background:transparent;color:inherit;padding:0 0 1px;border-radius:0;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-color .15s}
+    // C 極簡線條風：不填底色，細底線＋上標 [n]；稍後處理＝點線、編號淡；已處理＝虛線
+    // 只疊加、不佔位：編號絕對定位浮在字尾右上，不改變原報告的換行與寬度
+    let css = `mark.p4h-hl{position:relative;background:transparent;color:inherit;padding:0 0 1px;border-radius:0;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone;transition:background-color .15s}
     mark.p4h-hl:hover{background:color-mix(in srgb,var(--p4h-c) 12%,transparent)}
-    mark.p4h-hl[data-n]::after{content:'[' attr(data-n) ']';display:inline-block;margin-left:1px;color:var(--p4h-c);
-      font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;vertical-align:super;text-indent:0;letter-spacing:0;text-decoration:none}
-    mark.p4h-hl.p4h-must{border-bottom-width:2px!important}
-    mark.p4h-hl.p4h-must[data-n]::after{content:attr(data-n);margin-left:2px;padding:2px 4px;border-radius:3px;background:#d03b3a;color:#fff}
+    mark.p4h-hl[data-n]::after{content:'[' attr(data-n) ']';position:absolute;left:100%;top:-.55em;margin-left:1px;padding:0 1px;border-radius:2px;
+      background:rgba(255,255,255,.85);color:var(--p4h-c);white-space:nowrap;
+      font:600 10px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-indent:0;letter-spacing:0;text-decoration:none}
+    mark.p4h-hl.p4h-later{border-bottom-style:dotted!important}
+    mark.p4h-hl.p4h-later[data-n]::after{opacity:.55}
     mark.p4h-hl.p4h-resolved{border-bottom-style:dashed!important;text-decoration:none!important}
     mark.p4h-hl.p4h-resolved[data-n]::after{opacity:.45}
     mark.p4h-hl.p4h-flash{animation:p4h-fl .5s 3}
@@ -560,13 +588,13 @@
         const lab = h('div', { class: 'rl', text: String(a._n), title: t.label + (a.note ? T.colon + a.note : '') });
         lab.dataset.p4h = a.id;
         lab.addEventListener('click', (e) => openEditor(a, e.clientX, e.clientY));
-        const box = h('div', { class: 'region' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''), style: '--c:' + t.color }, lab);
+        const box = h('div', { class: 'region' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? '' : ' later'), style: '--c:' + t.color }, lab);
         box.dataset.p4h = a.id;
         pinLayer.appendChild(box);
         continue;
       }
       const p = h('div', {
-        class: 'pin' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? ' must' : ''),
+        class: 'pin' + (a.resolved ? ' res' : '') + (a.priority === 'must' ? '' : ' later'),
         style: '--c:' + t.color, title: (t.label + (a.note ? T.colon + a.note : '')) + '\n' + T.dragHint,
         text: String(a._n),
       });
@@ -579,26 +607,34 @@
     renderFab();
   }
   function positionPins() {
+    // 圖層裁切在文件原本的大小內：靠右的圖釘／框選不會撐出橫向捲軸
+    pinLayer.style.width = pinLayer.style.height = '0';
+    const de = document.documentElement, W = de.scrollWidth, H = de.scrollHeight;
+    pinLayer.style.width = W + 'px';
+    pinLayer.style.height = H + 'px';
     for (const p of pinLayer.children) {
       const a = byId(p.dataset.p4h), el = a && pinTarget(a);
       if (!el) continue;
       const r = el.getBoundingClientRect();
       p.style.display = r.width || r.height ? '' : 'none';
-      p.style.left = r.left + scrollX + a.rx * r.width + 'px';
-      p.style.top = r.top + scrollY + a.ry * r.height + 'px';
+      let x = r.left + scrollX + a.rx * r.width, y = r.top + scrollY + a.ry * r.height;
       if (a.kind === 'region') {
-        p.style.width = a.rw * r.width + 'px';
+        p.style.width = Math.min(a.rw * r.width, W - x) + 'px';
         p.style.height = a.rh * r.height + 'px';
+        p.firstChild.style.top = y < 18 ? '0' : '';  // 貼著頁面頂端時標籤放進框內，免得被裁掉
+      } else {
+        x = Math.min(x, W - p.offsetWidth);  // 靠邊的圖釘往內收，整顆看得到
+        y = Math.max(y, p.offsetHeight);
       }
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
     }
   }
   function renderFab() {
     const open = state.annotations.filter((a) => !a.resolved);
-    const must = open.filter((a) => a.priority === 'must').length;
     fab.textContent = T.fabLabel + ' ' + open.length;
     fab.title = T.fabTitle + '\n' + T.sync[sync];
     if (sync !== 'local') fab.prepend(syncDot());
-    if (must) fab.appendChild(h('span', { class: 'm', text: must }));
     if (hidden) fab.appendChild(h('span', { style: 'margin-left:6px;opacity:.6', text: T.hiddenTag }));
   }
 
@@ -750,7 +786,7 @@
 
   function create(type, anchor, x, y) {
     closeMenu();
-    const a = Object.assign({ id: uid(), type, note: '', replacement: '', priority: 'should', resolved: false, created: Date.now() }, anchor);
+    const a = Object.assign({ id: uid(), type, note: '', replacement: '', priority: 'must', resolved: false, created: Date.now() }, anchor);
     window.getSelection().removeAllRanges();
     if (TYPES[type].quick) {
       state.annotations.push(a); render(); save();
@@ -797,7 +833,11 @@
         a.reply ? h('div', { class: 'reply', text: T.aiReply + a.reply }) : null,
         h('div', { class: 'flags' },
           h('label', null, h('input', { type: 'checkbox', checked: draft.priority === 'must', onchange: (e) => (draft.priority = e.target.checked ? 'must' : 'should') }), T.must),
-          h('label', null, h('input', { type: 'checkbox', checked: draft.resolved, onchange: (e) => (draft.resolved = e.target.checked) }), T.resolved)),
+          h('span', { class: 'sp' }), h('span', { class: 'lbl', text: T.status }),
+          h('div', { class: 'seg' }, [false, true].map((v) => h('button', {
+            class: draft.resolved === v ? 'on' : '', text: v ? T.resolved : T.pending,
+            onclick: () => { draft.resolved = v; draw(); },
+          })))),
         h('div', { class: 'btns' },
           isNew ? null : h('button', { class: 'btn dan', text: T.del, onclick: () => remove(a) }),
           isNew ? null : h('button', { class: 'btn', text: T.reanchorBtn, title: T.reanchorTitle, onclick: () => startReanchor(a) }),
@@ -897,8 +937,8 @@
     return h('div', { class: 'card' + (a.resolved ? ' res' : ''), style: '--c:' + t.color, onclick: (e) => focusAnn(a) },
       h('div', { class: 'ct' },
         h('span', { class: 'n', text: a._n }), t.label,
-        a.priority === 'must' ? h('span', { class: 'must', text: T.must }) : null,
-        a.resolved ? h('span', { class: 'done', text: T.resolved }) : null,
+        h('span', { class: a.resolved ? 'st-done' : 'st-pend', text: a.resolved ? T.resolved : T.pending }),
+        a.priority === 'must' ? null : h('span', { class: 'later', text: T.later }),
         a._orphan ? h('span', { class: 'orph', text: T.orphanShort }) : null,
         a.heading ? h('span', { class: 'loc', text: '§ ' + a.heading }) : null),
       h('div', { class: 'cq', text: a.kind === 'text' ? T.lq + a.quote + T.rq : (a.kind === 'region' ? T.regionIn : '<') + a.tag + '> ' + (a.snippet || '') }),
@@ -930,7 +970,7 @@
       for (const a of open) {
         const t = TYPES[a.type] || TYPES.comment;
         const where = a.kind === 'text' ? q(ws(a.quote).slice(0, 60)) : '[' + (a.kind === 'region' ? M.region : M.point) + ' § ' + (a.heading || M.top) + ' <' + a.tag + '>]';
-        L.push(a._n + '. ' + t.label + (a.priority === 'must' ? M.mustTag : '') + ' ' + where +
+        L.push(a._n + '. ' + t.label + (a.priority === 'must' ? '' : M.laterTag) + ' ' + where +
           (a.replacement ? ' → ' + q(a.replacement) : '') + (a.note ? ' — ' + a.note.replace(/\n/g, ' ') : ''));
       }
       return L.join('\n');
@@ -942,7 +982,7 @@
       M.summary(open.length, must, done.length), ''];
     const one = (a) => {
       const t = TYPES[a.type] || TYPES.comment;
-      L.push('## ' + a._n + '. ' + t.label + (a.priority === 'must' ? M.mustTag : '') + (a._orphan ? M.orphan : ''));
+      L.push('## ' + a._n + '. ' + t.label + (a.priority === 'must' ? '' : M.laterTag) + (a._orphan ? M.orphan : ''));
       L.push(M.loc + (a.heading ? '§ ' + a.heading : M.beforeFirst));
       const pct = (v) => Math.round(v * 100) + '%';
       if (a.kind === 'text') {
@@ -1069,7 +1109,13 @@
       catch (e) { setSync('offline'); }
     }
     render();
-    addEventListener('load', render);
+    addEventListener('load', () => {
+      render();
+      try {  // liveRefresh 整頁重載後還原捲動位置
+        const y = sessionStorage.getItem(SCROLL_KEY);
+        if (y !== null) { sessionStorage.removeItem(SCROLL_KEY); scrollTo(0, +y); }
+      } catch (e) {}
+    });
     if (!state.annotations.length) toast(T.welcome, null, null, 6000);
   }
   window.pin4html = { get state() { return state; }, get sync() { return sync; }, lang: LANG, setLang, toMarkdown, render, open: () => toggleSide(true) };
