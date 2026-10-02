@@ -38,7 +38,7 @@
       synced: '已自動同步到檔案，AI 可直接讀取', offline: '伺服器離線，改動暫存在頁面，恢復後自動補存',
     },
     lsFail: '無法寫入 localStorage，請記得匯出 JSON',
-    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告已更新', reloadNew: '重新載入看新版',
+    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告已更新', working: (ns) => 'AI 正在修改 ' + ns + '…', workDone: (ns) => 'AI 改完了 ' + ns, inProgress: '處理中', reloadNew: '重新載入看新版',
     clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
     fabTitle: '審閱標記（Alt+R）', fabLabel: '標記', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
     drawTip: '拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
@@ -87,7 +87,7 @@
       synced: 'Auto-saved to file — your AI can read it', offline: 'Server offline — changes kept here, will retry',
     },
     lsFail: 'Cannot write to localStorage — remember to export JSON',
-    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report updated', reloadNew: 'Reload',
+    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report updated', working: (ns) => 'AI is editing ' + ns + '…', workDone: (ns) => 'AI finished ' + ns, inProgress: 'In progress', reloadNew: 'Reload',
     clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
     fabTitle: 'Annotations (Alt+R)', fabLabel: 'Notes', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
     drawTip: 'Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
@@ -220,7 +220,7 @@
       const y = map.get(x.id);
       map.set(x.id, y ? mergeOne(x, y) : x);
     }
-    return Object.assign({}, a, { annotations: [...map.values()], deleted: [...del], rev: Math.max(a.rev, b.rev) });
+    return Object.assign({}, a, { annotations: [...map.values()], deleted: [...del], rev: Math.max(a.rev, b.rev), working: b.working });
   }
   function scheduleSync() {
     if (!SERVER) return;
@@ -491,7 +491,7 @@
   .card:hover{background:var(--hov)}.card.res{opacity:.5}
   .ct{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600}
   .ct .n{color:var(--c);font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.ct .n::before{content:"#"}
-  .ct .st-pend,.ct .st-done,.ct .later{border-radius:3px;padding:0 5px;font-size:11px;font-weight:500}.ct .st-pend{background:#fff4e5;color:#b45309}.ct .st-done{background:#e7f6ec;color:#15803d}.ct .later{border:1px solid var(--bd);color:var(--mut)}.ct .orph{color:#d97706;font-weight:400}
+  .ct .st-pend,.ct .st-done,.ct .st-work,.ct .later{border-radius:3px;padding:0 5px;font-size:11px;font-weight:500}.ct .st-pend{background:#fff4e5;color:#b45309}.ct .st-work{background:#dbeafe;color:#1d4ed8}.ct .st-done{background:#e7f6ec;color:#15803d}.ct .later{border:1px solid var(--bd);color:var(--mut)}.ct .orph{color:#d97706;font-weight:400}
   .ct .loc{margin-left:auto;color:var(--mut);font-weight:400;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cq{color:var(--mut);font-size:12px;margin-top:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .cn{font-size:13px;margin-top:4px;white-space:pre-wrap}
@@ -500,6 +500,14 @@
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;
     box-shadow:0 8px 20px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;z-index:4}
   .toast button{background:none;border:0;color:#93c5fd;cursor:pointer;font-size:13px;font-weight:600}
+  .busy{position:fixed;top:16px;right:16px;z-index:3;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;
+    background:#1d4ed8;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(29,78,216,.35);animation:bz 2s ease-in-out infinite}
+  .busy.ok{background:#15803d;box-shadow:0 8px 24px rgba(21,128,61,.3);animation:none}
+  .ui.side-open .busy{right:386px}
+  .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+  .chk{width:6px;height:11px;margin:0 3px 3px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @keyframes bz{50%{box-shadow:0 8px 30px rgba(29,78,216,.65)}}
   @media print{.ui,.pins{display:none}}
   `;
   function docCss() {
@@ -552,7 +560,8 @@
   root.append(h('style', null, UI_CSS), pinLayer, ui);
   const fab = h('button', { class: 'fab', title: T.fabTitle, onclick: () => toggleSide() });
   const side = h('div', { class: 'side', style: 'display:none' });
-  ui.append(fab, side);
+  const busy = h('div', { class: 'busy', style: 'display:none', role: 'status' });
+  ui.append(fab, side, busy);
 
   // ---------- 繪製 ----------
   function sorted() {
@@ -565,7 +574,8 @@
     for (const a of state.annotations) {
       a._orphan = false; a._range = null; a._pos = null;
       if (a.kind === 'text') {
-        const r = locate(a, idx.text);
+        // 改寫已處理後原文不在了 → 改用替換文字定位，標記跟著新內容走
+        const r = locate(a, idx.text) || (a.resolved && a.replacement ? locate(Object.assign({}, a, { quote: a.replacement }), idx.text) : null);
         if (r) { a._range = r; a._pos = r[0]; } else a._orphan = true;
       } else {
         const el = pinTarget(a);
@@ -602,9 +612,30 @@
       bindPinDrag(p, a);
       pinLayer.appendChild(p);
     }
+    renderBusy();
     positionPins();
     renderSide();
     renderFab();
+  }
+  // AI 處理中提示（右上角）：watch 交出標記時寫入 working，reply 後清掉；超過 15 分鐘視為中斷不再顯示
+  let busyIds = [], busyLabel = '', busyTimer = 0;
+  function renderBusy() {
+    const w = state.working;
+    const ids = w && Array.isArray(w.ids) && Date.now() - (w.since || 0) < 15 * 60000 ? w.ids.filter(byId) : [];
+    const nums = (list) => list.map((id) => '#' + byId(id)._n).join(' ');
+    if (ids.length) {
+      clearTimeout(busyTimer);
+      busy.className = 'busy';
+      busyLabel = nums(ids);  // 改完後編號可能重排，「改完了」沿用處理中時的編號
+      busy.replaceChildren(h('span', { class: 'spin' }), T.working(busyLabel));
+      busy.style.display = '';
+    } else if (busyIds.length) {
+      busy.className = 'busy ok';
+      busy.replaceChildren(h('span', { class: 'chk' }), T.workDone(busyLabel));
+      clearTimeout(busyTimer);
+      busyTimer = setTimeout(() => (busy.style.display = 'none'), 5000);
+    }
+    busyIds = ids;
   }
   function positionPins() {
     // 圖層裁切在文件原本的大小內：靠右的圖釘／框選不會撐出橫向捲軸
@@ -887,6 +918,7 @@
   // ---------- 側欄 ----------
   function toggleSide(force) {
     sideOpen = force ?? !sideOpen;
+    ui.classList.toggle('side-open', sideOpen);
     side.style.display = sideOpen ? '' : 'none';
     fab.style.display = sideOpen ? 'none' : '';
     renderSide();
@@ -937,9 +969,11 @@
     return h('div', { class: 'card' + (a.resolved ? ' res' : ''), style: '--c:' + t.color, onclick: (e) => focusAnn(a) },
       h('div', { class: 'ct' },
         h('span', { class: 'n', text: a._n }), t.label,
-        h('span', { class: a.resolved ? 'st-done' : 'st-pend', text: a.resolved ? T.resolved : T.pending }),
+        a.resolved ? h('span', { class: 'st-done', text: T.resolved })
+          : busyIds.includes(a.id) ? h('span', { class: 'st-work', text: T.inProgress })
+          : h('span', { class: 'st-pend', text: T.pending }),
         a.priority === 'must' ? null : h('span', { class: 'later', text: T.later }),
-        a._orphan ? h('span', { class: 'orph', text: T.orphanShort }) : null,
+        a._orphan && !a.resolved ? h('span', { class: 'orph', text: T.orphanShort }) : null,  // 已處理的找不到原文是預期的
         a.heading ? h('span', { class: 'loc', text: '§ ' + a.heading }) : null),
       h('div', { class: 'cq', text: a.kind === 'text' ? T.lq + a.quote + T.rq : (a.kind === 'region' ? T.regionIn : '<') + a.tag + '> ' + (a.snippet || '') }),
       a.replacement ? h('div', { class: 'cn', text: '→ ' + a.replacement }) : null,

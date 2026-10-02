@@ -260,6 +260,10 @@ class Handler(SimpleHTTPRequestHandler):
             data['rev'] = cur.get('rev', 0) + 1
             data['file'] = html.name  # relative: the sidecar always sits next to the report
             data['title'] = data.get('title') or ''
+            if cur.get('working'):  # owned by watch / reply, never by the page
+                data['working'] = cur['working']
+            else:
+                data.pop('working', None)
             write_json(p, data)
         self._json(200, {'rev': data['rev']})
 
@@ -324,6 +328,14 @@ def cmd_strip(a):
 
 
 # ---------- show / reply ----------
+def html_for(pins: Path) -> Path:
+    base = pins.name[:-len('.pins.json')]
+    for ext in ('.html', '.htm'):
+        if (pins.parent / (base + ext)).exists():
+            return pins.parent / (base + ext)
+    return pins.parent / (base + '.html')
+
+
 def resolve_pins(path: str) -> Path:
     p = Path(path).resolve()
     return p if p.name.endswith('.pins.json') else sidecar(p)
@@ -388,11 +400,19 @@ def cmd_watch(a):
         # wait until the reviewer has paused, then look once per file version
         if sig is not None and sig != checked and time.time() - stable_since >= a.quiet:
             checked = sig
-            data = load_pins(p)
-            todo = [x for x in by_position(data) if needs_ai(x)]
+            with pins_lock(p):
+                data = load_pins(p)
+                todo = [x for x in by_position(data) if needs_ai(x)]
+                if todo:  # the open page shows "AI is editing #n" until `reply` clears it
+                    data['working'] = {'ids': [x['id'] for x in todo], 'since': int(time.time() * 1000)}
+                    data['rev'] = data.get('rev', 0) + 1
+                    write_json(p, data)
             if todo:
                 print(f'# {p.name}  rev={data.get("rev", 0)}  {len(todo)} to fix now')
-                print('# Edit the report, `reply` to each (resolved: true when fixed), then run `watch` again.')
+                print(f'# Report: {html_for(p)}')
+                print('# Read the whole report first (at least once per session, again if it changed under you); when a fix')
+                print('# touches a fact, figure or term, update every other place it appears. Then `reply` to each')
+                print('# (resolved: true when fixed) and run `watch` again.')
                 for x in todo:
                     print_pin(x)
                 return
@@ -409,7 +429,7 @@ def cmd_reply(a):
         data = load_pins(p)
         anns = data.get('annotations', [])
         now = int(time.time() * 1000)
-        hit = 0
+        hit, replied = 0, set()
         for key, val in replies.items():
             ann = next((x for x in anns if x['id'] == key or str(x.get('n')) == str(key).lstrip('#')), None)
             if not ann:
@@ -428,7 +448,15 @@ def cmd_reply(a):
             else:
                 ann.pop('replyResolved', None)
             ann['updated'] = now
+            replied.add(ann['id'])
             hit += 1
+        w = data.get('working')
+        if w:
+            left = [i for i in w.get('ids', []) if i not in replied]
+            if left:
+                w['ids'] = left
+            else:
+                data.pop('working')
         data['rev'] = data.get('rev', 0) + 1
         data['savedAt'] = now
         write_json(p, data)
