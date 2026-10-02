@@ -669,7 +669,7 @@
         h('span', { class: st === 'work' ? 'spin sm' : st === 'ok' ? 'chk sm' : 'qm sm', text: st === 'ask' ? '?' : null }));
       })));
     busy.style.display = '';
-    if (all && !ask) busyTimer = setTimeout(hide, 5000);  // 有要使用者回答的就留著，等他關
+    if (all && !ask) busyTimer = setTimeout(hide, 2000);  // 全部改好 2 秒後消失；有要使用者回答的就留著，等他關
   }
 
   function positionPins() {
