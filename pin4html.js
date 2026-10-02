@@ -533,6 +533,7 @@
     mark.p4h-hl[data-n]::after{content:'[' attr(data-n) ']';position:absolute;left:100%;top:-.55em;margin-left:1px;padding:0 1px;border-radius:2px;
       background:rgba(255,255,255,.85);color:var(--p4h-c);white-space:nowrap;
       font:600 10px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-indent:0;letter-spacing:0;text-decoration:none}
+    mark.p4h-hl.p4h-num{border:0!important;padding:0!important;background:none!important;text-decoration:none!important}
     mark.p4h-hl.p4h-later{border-bottom-style:dotted!important}
     mark.p4h-hl.p4h-later[data-n]::after{opacity:.55}
     mark.p4h-hl.p4h-resolved{border-bottom-style:dashed!important;text-decoration:none!important}
@@ -603,7 +604,14 @@
       if (a.kind !== 'text' || !a._range || !visible(a)) continue;
       const marks = wrapRange(a._range[0], a._range[1], a);
       if (!marks.length) a._orphan = true;
-      else marks[marks.length - 1].dataset.n = a._n;
+      else {
+        // 編號掛在最後一個字後面的空 mark（寬度 0），跨行的標記編號才會在句尾、不會跑到開頭
+        const last = marks[marks.length - 1], num = document.createElement('mark');
+        num.className = last.className + ' p4h-num';
+        num.dataset.p4h = a.id; num.dataset.n = a._n;
+        if (last.title) num.title = last.title;
+        last.after(num);
+      }
     }
     pinLayer.textContent = '';
     for (const a of state.annotations) {
