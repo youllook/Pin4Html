@@ -38,7 +38,7 @@
       synced: '已自動同步到檔案，AI 可直接讀取', offline: '伺服器離線，改動暫存在頁面，恢復後自動補存',
     },
     lsFail: '無法寫入 localStorage，請記得匯出 JSON',
-    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告已更新', working: (ns) => 'AI 正在修改 ' + ns + '…', workDone: (ns) => 'AI 改完了 ' + ns, inProgress: '處理中', reloadNew: '重新載入看新版',
+    gotReply: '收到 AI 回覆', pinsUpdated: '標記已更新', htmlChanged: '報告已更新', working: 'AI 正在修改', workDone: 'AI 改完了', workAsk: (k) => 'AI 處理完・' + k + ' 則要您回覆', close: '關閉', inProgress: '處理中', reloadNew: '重新載入看新版',
     clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
     fabTitle: '審閱標記（Alt+R）', fabLabel: '標記', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
     drawTip: '拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
@@ -87,7 +87,7 @@
       synced: 'Auto-saved to file — your AI can read it', offline: 'Server offline — changes kept here, will retry',
     },
     lsFail: 'Cannot write to localStorage — remember to export JSON',
-    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report updated', working: (ns) => 'AI is editing ' + ns + '…', workDone: (ns) => 'AI finished ' + ns, inProgress: 'In progress', reloadNew: 'Reload',
+    gotReply: 'AI replied', pinsUpdated: 'Pins updated', htmlChanged: 'Report updated', working: 'AI is editing', workDone: 'AI finished', workAsk: (k) => 'AI done · ' + k + ' need your input', close: 'Close', inProgress: 'In progress', reloadNew: 'Reload',
     clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
     fabTitle: 'Annotations (Alt+R)', fabLabel: 'Notes', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
     drawTip: 'Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
@@ -500,12 +500,27 @@
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:8px;font-size:13px;
     box-shadow:0 8px 20px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center;z-index:4}
   .toast button{background:none;border:0;color:#93c5fd;cursor:pointer;font-size:13px;font-weight:600}
-  .busy{position:fixed;top:16px;right:16px;z-index:3;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;
-    background:#1d4ed8;color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(29,78,216,.35);animation:bz 2s ease-in-out infinite}
+  .busy{position:fixed;top:16px;right:16px;z-index:3;width:320px;max-width:calc(100vw - 32px);border-radius:12px;overflow:hidden;
+    background:#1d4ed8;color:#fff;box-shadow:0 8px 24px rgba(29,78,216,.35);animation:bz 2s ease-in-out infinite}
   .busy.ok{background:#15803d;box-shadow:0 8px 24px rgba(21,128,61,.3);animation:none}
+  .busy.ask{background:#b45309;box-shadow:0 8px 24px rgba(180,83,9,.3);animation:none}
+  .busy .bx{border:0;background:none;color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0 0 0 4px;opacity:.85}
+  .qm{flex:none;width:16px;height:16px;border-radius:50%;background:#fff;color:#b45309;font:700 11px/16px system-ui;text-align:center}
+  .qm.sm{width:14px;height:14px;line-height:14px;background:#fef3c7;color:#b45309}
+  .busy .bh{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:14px;font-weight:600}
+  .busy .cnt{margin-left:auto;font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;opacity:.85}
+  .busy .bl{background:var(--bg);color:var(--fg);padding:4px 0;max-height:240px;overflow:auto}
+  .busy .bi{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:13px;cursor:pointer}
+  .busy .bi:hover{background:var(--hov)}
+  .busy .bi .n{color:var(--c);font:600 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;flex:none}
+  .busy .bi .t{color:var(--c);font-weight:600;flex:none}
+  .busy .bi .q{color:var(--mut);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .busy .bi.done .q{opacity:.6}
   .ui.side-open .busy{right:386px}
-  .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
-  .chk{width:6px;height:11px;margin:0 3px 3px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .spin{flex:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
+  .chk{flex:none;width:6px;height:11px;margin:0 3px 3px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .spin.sm{width:12px;height:12px;border-color:color-mix(in srgb,var(--acc) 25%,transparent);border-top-color:var(--acc)}
+  .chk.sm{width:5px;height:10px;border-color:#16a34a}
   @keyframes sp{to{transform:rotate(360deg)}}
   @keyframes bz{50%{box-shadow:0 8px 30px rgba(29,78,216,.65)}}
   @media print{.ui,.pins{display:none}}
@@ -617,26 +632,46 @@
     renderSide();
     renderFab();
   }
-  // AI 處理中提示（右上角）：watch 交出標記時寫入 working，reply 後清掉；超過 15 分鐘視為中斷不再顯示
-  let busyIds = [], busyLabel = '', busyTimer = 0;
+  // AI 處理中提示（右上角）：watch 交出標記時寫入 working，reply 逐則清掉；超過 15 分鐘視為中斷不再顯示。
+  // 清單在開始時記下（編號、類型、片段），改完編號可能重排也不影響；回覆一則就打勾一則。
+  let busyIds = [], busyItems = [], busyTimer = 0;
   function renderBusy() {
     const w = state.working;
     const ids = w && Array.isArray(w.ids) && Date.now() - (w.since || 0) < 15 * 60000 ? w.ids.filter(byId) : [];
-    const nums = (list) => list.map((id) => '#' + byId(id)._n).join(' ');
-    if (ids.length) {
-      clearTimeout(busyTimer);
-      busy.className = 'busy';
-      busyLabel = nums(ids);  // 改完後編號可能重排，「改完了」沿用處理中時的編號
-      busy.replaceChildren(h('span', { class: 'spin' }), T.working(busyLabel));
-      busy.style.display = '';
-    } else if (busyIds.length) {
-      busy.className = 'busy ok';
-      busy.replaceChildren(h('span', { class: 'chk' }), T.workDone(busyLabel));
-      clearTimeout(busyTimer);
-      busyTimer = setTimeout(() => (busy.style.display = 'none'), 5000);
+    if (ids.length && !busyIds.length) busyItems = [];  // 上一輪已結束、新一輪開始 → 換一張新清單
+    for (const id of ids) {
+      if (busyItems.some((x) => x.id === id)) continue;
+      const a = byId(id), t = TYPES[a.type] || TYPES.comment;
+      const what = a.kind === 'text' ? T.lq + a.quote + T.rq : a.note || a.snippet || '<' + a.tag + '>';
+      busyItems.push({ id, n: a._n, label: t.label, color: t.color,
+        snip: (what + (a.replacement ? ' → ' + a.replacement : '')).replace(/\s+/g, ' ') });
     }
     busyIds = ids;
+    if (!busyItems.length) return;
+    // 每則三種結果：處理中（轉圈）／已改好（綠勾）／已回覆但要使用者回答（琥珀 ?）
+    const stateOf = (x) => ids.includes(x.id) ? 'work' : (byId(x.id) || {}).resolved ? 'ok' : 'ask';
+    const left = busyItems.filter((x) => stateOf(x) === 'work').length, all = !left;
+    const ask = busyItems.filter((x) => stateOf(x) === 'ask').length;
+    const hide = () => { busy.style.display = 'none'; busyItems = []; };
+    clearTimeout(busyTimer);
+    busy.className = 'busy' + (all ? (ask ? ' ask' : ' ok') : '');
+    busy.replaceChildren(
+      h('div', { class: 'bh' }, h('span', { class: all ? (ask ? 'qm' : 'chk') : 'spin', text: all && ask ? '?' : null }),
+        all ? (ask ? T.workAsk(ask) : T.workDone) : T.working,
+        h('span', { class: 'cnt', text: (busyItems.length - left) + '/' + busyItems.length }),
+        all ? h('button', { class: 'bx', text: '×', title: T.close, onclick: hide }) : null),
+      h('div', { class: 'bl' }, busyItems.map((x) => {
+        const st = stateOf(x);
+        return h('div', { class: 'bi' + (st === 'work' ? '' : ' done'), style: '--c:' + x.color, title: x.snip,
+          onclick: () => { const a = byId(x.id); if (a) focusAnn(a); } },
+        h('span', { class: 'n', text: '#' + x.n }), h('span', { class: 't', text: x.label }),
+        h('span', { class: 'q', text: x.snip }),
+        h('span', { class: st === 'work' ? 'spin sm' : st === 'ok' ? 'chk sm' : 'qm sm', text: st === 'ask' ? '?' : null }));
+      })));
+    busy.style.display = '';
+    if (all && !ask) busyTimer = setTimeout(hide, 5000);  // 有要使用者回答的就留著，等他關
   }
+
   function positionPins() {
     // 圖層裁切在文件原本的大小內：靠右的圖釘／框選不會撐出橫向捲軸
     pinLayer.style.width = pinLayer.style.height = '0';
