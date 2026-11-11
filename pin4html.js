@@ -42,6 +42,7 @@
     clickToView: '，點標記查看', dot: '・', colon: '：', lq: '「', rq: '」',
     fabTitle: '審閱標記（Alt+R）', fabLabel: '標記', hiddenTag: '（已隱藏）', dragHint: '（可拖曳移動）',
     drawTip: '拖曳框出要標記的區域（Esc 取消）', tooSmall: '區域太小，已取消',
+    tSel: '標記選取的文字', tPin: '放圖釘', tBox: '框選區域', tPinTip: '點一下要標記的位置', tCancel: '取消', tSelTip: '先長按選取文字，再按「標記選取的文字」',
     headText: (q) => '標記選取：「' + q + '」', headRegion: (t) => '標記框選區域（' + t + ' 內）',
     headPin: (t) => '在此處釘一個標記（虛線框＝會附著的元素 ' + t + '）',
     toRegion: '改成框選區域…', openList: '開啟標記清單',
@@ -64,6 +65,7 @@
     orphanShort: '找不到原文', regionIn: '區域 in <',
     copied: (n) => '已複製 ' + n + ' 則意見，貼到 AI 對話即可', imported: (n) => '已匯入 ' + n + ' 則', importFail: '匯入失敗：',
     welcome: '審閱模式：選取文字或直接按右鍵新增標記（Alt+R 開清單）',
+    welcomeTouch: '審閱模式：用下方工具列標記——長按選字後按「標記選取的文字」，或放圖釘、框選區域',
     langBtn: 'EN', langTitle: 'Switch to English',
     md: {
       title: '# 審閱意見：', count: (n) => '（' + n + ' 則）', region: '區域', point: '位置', top: '開頭',
@@ -91,6 +93,7 @@
     clickToView: ' — click a pin to view', dot: ' · ', colon: ': ', lq: '"', rq: '"',
     fabTitle: 'Annotations (Alt+R)', fabLabel: 'Notes', hiddenTag: ' (hidden)', dragHint: '(drag to move)',
     drawTip: 'Drag to box an area (Esc to cancel)', tooSmall: 'Area too small — cancelled',
+    tSel: 'Mark selected text', tPin: 'Drop a pin', tBox: 'Box an area', tPinTip: 'Tap the spot to mark', tCancel: 'Cancel', tSelTip: 'Long-press to select text, then tap “Mark selected text”',
     headText: (q) => 'Annotate selection: "' + q + '"', headRegion: (t) => 'Annotate boxed area (inside ' + t + ')',
     headPin: (t) => 'Drop a pin here (dashed box = attached element ' + t + ')',
     toRegion: 'Box an area instead…', openList: 'Open annotation list',
@@ -113,6 +116,7 @@
     orphanShort: 'Text not found', regionIn: 'Area in <',
     copied: (n) => 'Copied ' + n + ' notes — paste them into your AI chat', imported: (n) => 'Imported ' + n, importFail: 'Import failed: ',
     welcome: 'Review mode: select text or right-click anywhere to annotate (Alt+R for the list)',
+    welcomeTouch: 'Review mode: use the toolbar below — long-press to select text then tap “Mark selected text”, or drop a pin / box an area',
     langBtn: '中', langTitle: '切換成中文',
     md: {
       title: '# Review notes: ', count: (n) => ' (' + n + ')', region: 'area', point: 'pin', top: 'top',
@@ -146,6 +150,7 @@
   const ORDER = Object.keys(TYPES);
 
   let state = load();
+  const TOUCH_UI = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || navigator.maxTouchPoints > 0;
   let hidden = false, showResolved = true, sideOpen = false, reanchorId = null, filterType = null;
   let menuEl = null, editorEl = null, toastTimer = null;
   const PREF = 'pin4html:pref:detail';
@@ -448,7 +453,11 @@
   .region .rl{position:absolute;left:-1px;top:-18px;height:18px;padding:0 5px;border-radius:2px 2px 2px 0;background:var(--c);color:#fff;
     font:600 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap;cursor:pointer;pointer-events:auto}
   .target{position:absolute;outline:1px dashed var(--acc);outline-offset:2px;border-radius:2px;background:color-mix(in srgb,var(--acc) 5%,transparent);pointer-events:none}
-  .drawov{position:fixed;inset:0;cursor:crosshair;background:rgba(0,0,0,.06);z-index:5}
+  .drawov{position:fixed;inset:0;cursor:crosshair;background:rgba(0,0,0,.06);z-index:5;touch-action:none}
+  .tbar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;border-radius:14px;background:var(--bg);border:1px solid var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:4}
+  .tbar button{border:1px solid var(--bd);background:var(--bg);color:var(--fg);border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;white-space:nowrap}
+  .tbar button.on{background:var(--acc);border-color:var(--acc);color:#fff}.tbar button.hot{background:#fde68a;border-color:#d97706;color:#111}
+  .ui.touch .fab{bottom:84px}.ui.touch .toast{bottom:84px}
   .drawov .box{position:absolute;border:2px dashed var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);border-radius:6px}
   .drawov .tip{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px}
   .seg{display:flex;border:1px solid var(--bd);border-radius:6px;overflow:hidden;font-size:12px}
@@ -1171,6 +1180,46 @@
     if (e.altKey && !e.ctrlKey && (e.key === 'd' || e.key === 'D') && !hidden) { e.preventDefault(); startDraw(); }
   }, true);
 
+  // ---------- 觸控（手機／平板：沒有右鍵、沒有 Alt+D）----------
+  // 底部工具列：標記選取的文字／放圖釘（下一次點擊的位置）／框選區域。Android 長按仍會走 contextmenu。
+  if (TOUCH_UI) {
+    let pinArm = false, lastRange = null, selOn = false, selOffAt = 0;
+    const inHost = (n) => n && (n === host || host.contains(n) || (n.getRootNode && n.getRootNode() === root));
+    const bSel = h('button', { text: T.tSel, onclick: () => {
+      // tapping the button may already have collapsed the selection: accept a range that was live a moment ago
+      const r = (selOn || Date.now() - selOffAt < 2000) ? lastRange : null;
+      const anc = r && !r.collapsed && rangeToAnchor(r);
+      if (!anc) { toast(T.tSelTip); return; }
+      const b = r.getBoundingClientRect();
+      getSelection().removeAllRanges(); lastRange = null; selOn = false; syncBar();
+      openCreateMenu(Math.max(8, b.left), b.bottom + 8, anc);
+    } });
+    const bPin = h('button', { text: T.tPin, onclick: () => {
+      pinArm = !pinArm; syncBar(); if (pinArm) toast(T.tPinTip, T.tCancel, () => { pinArm = false; syncBar(); }, 15000); else hideToast();
+    } });
+    const bBox = h('button', { text: T.tBox, onclick: () => { pinArm = false; syncBar(); hideToast(); startDraw(); } });
+    const bar = h('div', { class: 'tbar' }, bSel, bPin, bBox);
+    bar.addEventListener('mousedown', (e) => e.preventDefault());  // keep the page selection when tapping a button
+    function syncBar() {
+      bPin.classList.toggle('on', pinArm);
+      bSel.classList.toggle('hot', selOn);
+      bar.style.display = hidden ? 'none' : '';
+    }
+    document.addEventListener('selectionchange', () => {
+      const s = getSelection();
+      if (s && s.rangeCount && !s.isCollapsed && !inHost(s.anchorNode)) { lastRange = s.getRangeAt(0).cloneRange(); selOn = true; }
+      else if (s && s.isCollapsed && selOn) { selOn = false; selOffAt = Date.now(); }
+      syncBar();
+    });
+    document.addEventListener('click', (e) => {
+      if (!pinArm || e.composedPath().includes(host)) return;
+      e.preventDefault(); e.stopPropagation();
+      pinArm = false; syncBar(); hideToast();
+      openCreateMenu(e.clientX, e.clientY, pointAnchor(e.target, e.clientX, e.clientY));
+    }, true);
+    ui.classList.add('touch'); ui.appendChild(bar); syncBar();
+  }
+
   let raf = 0;
   const repos = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(positionPins); };
   addEventListener('resize', repos);
@@ -1193,7 +1242,7 @@
         if (y !== null) { sessionStorage.removeItem(SCROLL_KEY); scrollTo(0, +y); }
       } catch (e) {}
     });
-    if (!state.annotations.length) toast(T.welcome, null, null, 6000);
+    if (!state.annotations.length) toast((TOUCH_UI ? T.welcomeTouch : T.welcome), null, null, 6000);
   }
   window.pin4html = { get state() { return state; }, get sync() { return sync; }, lang: LANG, setLang, toMarkdown, render, open: () => toggleSide(true) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

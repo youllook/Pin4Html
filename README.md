@@ -25,6 +25,7 @@ Want to look first: `python pin4html.py serve examples/showcase-en.html` (every 
 | Right-click an annotation | Change type, fix now / later, pending / done, re-select, delete (undoable) |
 | `Alt+R` / `Alt+H` | List / hide all |
 | `Shift` + right-click | Browser menu |
+| Phone / tablet (touch) | Bottom toolbar: long-press to select text → **Mark selected text**; **Drop a pin** then tap a spot; **Box an area** with a finger drag |
 
 Types: Comment, Rewrite, Delete, Add, Verify, Question, Layout.
 Status: Pending or Done. Not fixed right? Mark it again.
@@ -120,7 +121,7 @@ python pin4html.py serve report.html
 ```
 
 - 先看範例：`python pin4html.py serve examples/showcase.html`
-- 操作：選字＋右鍵＝文字標記；空白處右鍵＝圖釘；`Alt+D` 框區域；`Alt+R` 清單；`Alt+H` 隱藏；`Shift`＋右鍵＝原生選單
+- 操作：選字＋右鍵＝文字標記；空白處右鍵＝圖釘；`Alt+D` 框區域；`Alt+R` 清單；`Alt+H` 隱藏；`Shift`＋右鍵＝原生選單；手機／平板用底部工具列（長按選字→標記選取的文字、放圖釘、框選區域）
 - 類型：留言、改寫、刪除、補充、查證、疑問、版面
 - 狀態：待處理／已處理。改得不對就再標一次
 - 「立即處理」預設勾。AI 端跑著 `watch` 的話，標完停手幾秒它就開始改，右上角會列出正在改哪幾則、改好打勾；它沒辦法自己決定的會打「?」，等你回
